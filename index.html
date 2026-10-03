@@ -210,7 +210,7 @@
             overflow: hidden;
             transform: scale(0.95);
             opacity: 0;
-            transition: transform 0.2s ease, opacity 0.2s ease, width 0.2s ease, height 0.2s ease, top 0.2s ease, left 0.2s ease, border-radius 0.2s ease;
+            transition: transform 0.2s ease, opacity 0.2s ease;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         }
 
@@ -733,7 +733,7 @@
                 if(dockIcon) dockIcon.classList.add('active');
                 
                 // Centering initial position for better UX
-                if (!win.style.top) {
+                if (!win.style.top || windowStates[appId]?.maximized) {
                     const desktop = document.getElementById('desktop-area');
                     const dw = desktop.clientWidth;
                     const dh = desktop.clientHeight;
@@ -787,25 +787,34 @@
                 state.height = win.style.height || `${win.clientHeight}px`;
                 state.borderRadius = win.style.borderRadius;
 
-                // Maximize window to true full-screen (covering entire screen)
+                // Maximize window to true viewport coverage
+                win.style.position = 'fixed';
                 win.style.top = '0px';
                 win.style.left = '0px';
                 win.style.width = '100vw';
                 win.style.height = '100vh';
                 win.style.borderRadius = '0px';
+                win.style.zIndex = '9999';
                 state.maximized = true;
             } else {
                 // Restore previous dimensions
+                win.style.position = 'absolute';
                 win.style.top = state.top;
                 win.style.left = state.left;
                 win.style.width = state.width;
                 win.style.height = state.height;
                 win.style.borderRadius = state.borderRadius || '12px';
                 state.maximized = false;
+                bringToFront(win);
             }
         }
 
         function bringToFront(element) {
+            const appId = element.id.replace('window-', '');
+            if (windowStates[appId] && windowStates[appId].maximized) {
+                element.style.zIndex = '9999';
+                return;
+            }
             zIndexCounter++;
             element.style.zIndex = zIndexCounter;
         }
