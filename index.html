@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave OS</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            background: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2560&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            user-select: none;
+        }
+
+        /* Power & Boot Screens */
+        #power-screen {
+            position: fixed;
+            inset: 0;
+            background-color: #000;
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .power-btn {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .power-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            background-color: #000;
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease, visibility 1s ease;
+            opacity: 1;
+        }
+
+        .boot-logo {
+            color: white;
+            font-size: 80px;
+            margin-bottom: 40px;
+        }
+
+        .loading-bar-container {
+            width: 200px;
+            height: 4px;
+            background-color: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .loading-bar {
+            width: 0%;
+            height: 100%;
+            background-color: white;
+            border-radius: 4px;
+        }
+
+        .run-boot-anim {
+            animation: loadOS 5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+
+        @keyframes loadOS {
+            0% { width: 0%; }
+            20% { width: 15%; }
+            50% { width: 60%; }
+            80% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        /* Glassmorphism utilities */
+        .glass {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .glass-panel {
+            background: rgba(250, 250, 250, 0.7);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        /* Top Menu Bar */
+        #menubar {
+            height: 28px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1d1d1f;
+            z-index: 9999;
+            position: relative;
+        }
+
+        .menu-item {
+            padding: 2px 10px;
+            border-radius: 4px;
+            cursor: default;
+            transition: background 0.1s;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* macOS Dock */
+        #dock-container {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            z-index: 9998;
+            pointer-events: none;
+        }
+
+        #dock {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 24px;
+            transition: width 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .dock-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transform-origin: bottom;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .dock-icon:hover {
+            transform: scale(1.4) translateY(-10px);
+            margin: 0 10px;
+            z-index: 10;
+        }
+
+        .dock-icon.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            width: 4px;
+            height: 4px;
+            background: #1d1d1f;
+            border-radius: 50%;
+        }
+
+        .hidden-app {
+            display: none !important;
+        }
+
+        /* Window System */
+        .os-window {
+            position: absolute;
+            top: 100px;
+            left: 150px;
+            border-radius: 12px;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.2s ease, opacity 0.2s ease, width 0.2s ease, height 0.2s ease, top 0.2s ease, left 0.2s ease;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+
+        .os-window.open {
+            display: flex;
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .window-header {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            cursor: pointer;
+            position: relative;
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+            z-index: 2;
+        }
+
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .traffic-light i {
+            font-size: 8px;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+        
+        .traffic-lights:hover .traffic-light i { opacity: 0.6; }
+
+        .close { background: #ff5f56; border: 1px solid #e0443e; color: #4d0000; }
+        .minimize { background: #ffbd2e; border: 1px solid #dea123; color: #995700; }
+        .maximize { background: #27c93f; border: 1px solid #1aab29; color: #006500; }
+
+        .window-title {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            left: 0;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4a4a4a;
+            pointer-events: none;
+        }
+
+        .window-content {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+            display: flex;
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Specific App Sizing */
+        #window-calculator { width: 232px; height: 320px; }
+        #window-browser { width: 900px; height: 600px; max-width: 95vw; max-height: 80vh; }
+        #window-appstore { width: 750px; height: 500px; max-width: 95vw; max-height: 80vh;}
+        #window-terminal { width: 600px; height: 400px; max-width: 95vw; max-height: 80vh;}
+
+        /* Calculator Styles */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+            background: #444;
+            flex: 1;
+        }
+        .calc-btn {
+            background: #e0e0e0;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.1s;
+        }
+        .calc-btn:active { background: #ccc; }
+        .calc-btn.op { background: #ff9f0a; color: white; }
+        .calc-btn.op:active { background: #c97c07; }
+        .calc-btn.top-op { background: #d4d4d2; }
+        .calc-btn.top-op:active { background: #b8b8b8; }
+        .calc-btn.zero { grid-column: span 2; padding-left: 20px; justify-content: flex-start; }
+        
+        #calc-display {
+            background: #333333;
+            color: white;
+            font-size: 40px;
+            text-align: right;
+            padding: 10px 15px;
+            font-weight: 300;
+            height: 70px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+        }
+
+        /* App Store Styles */
+        .app-store-sidebar { width: 200px; border-right: 1px solid rgba(0,0,0,0.1); padding: 20px 10px; }
+        .app-store-main { flex: 1; padding: 30px; overflow-y: auto; }
+        .app-card {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            gap: 16px;
+        }
+        .app-card-icon {
+            width: 64px; height: 64px; border-radius: 14px;
+            display: flex; justify-content: center; align-items: center; font-size: 32px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .app-card-info { flex: 1; }
+        .app-card-btn {
+            background: #f0f0f0; color: #007aff; font-weight: 600; font-size: 13px;
+            padding: 6px 16px; border-radius: 16px; cursor: pointer; transition: all 0.2s; border: none;
+        }
+        .app-card-btn:hover { background: #e0e0e0; }
+        .app-card-btn.installed { background: transparent; border: 1px solid #ccc; color: #888; }
+
+        /* Install Progress Bar */
+        .install-progress-wrapper {
+            width: 60px;
+            height: 28px;
+            background: #e0e0e0;
+            border-radius: 14px;
+            overflow: hidden;
+            display: none;
+        }
+        .install-progress-fill {
+            height: 100%;
+            background: #007aff;
+            width: 0%;
+            transition: width 5s linear;
+        }
+
+        /* Terminal specific styles */
+        #term-input {
+            width: 100%;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+
+        @media (max-width: 768px) {
+            .app-store-sidebar { display: none; }
+            .os-window { width: 95vw !important; left: 2.5vw !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Power Screen (Required for Audio Autoplay) -->
+    <div id="power-screen">
+        <button class="power-btn" onclick="startBootSequence()" title="Power On">
+            <i class="fa-solid fa-power-off"></i>
+        </button>
+        <div class="text-white/50 mt-6 text-sm font-light">Press to Power On Wave OS</div>
+    </div>
+
+    <!-- Boot Screen -->
+    <div id="boot-screen">
+        <i class="fa-solid fa-water boot-logo"></i>
+        <div class="loading-bar-container">
+            <div id="loading-progress" class="loading-bar"></div>
+        </div>
+    </div>
+
+    <!-- Menu Bar -->
+    <nav id="menubar">
+        <div class="flex items-center gap-1 overflow-x-auto whitespace-nowrap hide-scrollbar">
+            <div class="menu-item font-bold text-lg cursor-pointer"><i class="fa-solid fa-water text-blue-600"></i></div>
+            <div class="menu-item font-bold">Wave OS</div>
+            <div class="menu-item hidden sm:block">File</div>
+            <div class="menu-item hidden sm:block">Edit</div>
+            <div class="menu-item hidden sm:block">View</div>
+            <div class="menu-item hidden sm:block">Go</div>
+            <div class="menu-item hidden md:block">Window</div>
+            <div class="menu-item hidden md:block">Help</div>
+        </div>
+        <div class="flex items-center gap-4 shrink-0">
+            <div class="flex gap-4 text-gray-700 items-center">
+                <i class="fa-solid fa-expand cursor-pointer hover:text-black transition" onclick="toggleFullscreen()" title="Toggle Fullscreen"></i>
+                <i class="fa-solid fa-wifi cursor-pointer"></i>
+                <i class="fa-solid fa-battery-three-quarters cursor-pointer"></i>
+                <i class="fa-solid fa-magnifying-glass cursor-pointer"></i>
+            </div>
+            <div id="clock" class="menu-item font-medium">--:--</div>
+        </div>
+    </nav>
+
+    <!-- Window Container -->
+    <div id="desktop-area" class="relative w-full h-[calc(100vh-28px)]">
+        
+        <!-- App Store Window -->
+        <div id="window-appstore" class="os-window glass-panel">
+            <div class="window-header">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeWindow('appstore')"><i class="fa-solid fa-xmark"></i></div>
+                    <div class="traffic-light minimize" onclick="closeWindow('appstore')"><i class="fa-solid fa-minus"></i></div>
+                    <div class="traffic-light maximize" onclick="toggleMaximize('appstore')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+                </div>
+                <div class="window-title">App Store</div>
+            </div>
+            <div class="window-content">
+                <div class="app-store-sidebar bg-white/40">
+                    <div class="text-xl font-bold mb-6 px-2">Discover</div>
+                    <div class="sidebar-item bg-blue-100 text-blue-600 font-medium p-2 rounded-lg mb-2"><i class="fa-solid fa-rocket mr-2"></i> Featured</div>
+                    <div class="sidebar-item hover:bg-black/5 p-2 rounded-lg mb-2 cursor-pointer"><i class="fa-solid fa-list mr-2"></i> Categories</div>
+                    <div class="sidebar-item hover:bg-black/5 p-2 rounded-lg cursor-pointer"><i class="fa-solid fa-rotate mr-2"></i> Updates</div>
+                </div>
+                <div class="app-store-main bg-white/60">
+                    <h1 class="text-3xl font-bold border-b border-black/10 pb-4 mb-4">Recommended for You</h1>
+                    
+                    <!-- Calculator App Card -->
+                    <div class="app-card">
+                        <div class="app-card-icon bg-orange-400 text-white"><i class="fa-solid fa-calculator"></i></div>
+                        <div class="app-card-info">
+                            <div class="text-lg font-bold text-gray-800">Calculator</div>
+                            <div class="text-sm text-gray-500">Perform basic mathematics.</div>
+                        </div>
+                        <button id="install-btn-calculator" class="app-card-btn" onclick="startInstall('calculator')">GET</button>
+                        <div id="install-prog-calculator" class="install-progress-wrapper">
+                            <div id="install-fill-calculator" class="install-progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Browser App Card -->
+                    <div class="app-card">
+                        <div class="app-card-icon bg-blue-500 text-white"><i class="fa-regular fa-compass"></i></div>
+                        <div class="app-card-info">
+                            <div class="text-lg font-bold text-gray-800">Browser</div>
+                            <div class="text-sm text-gray-500">Surf the web securely.</div>
+                        </div>
+                        <button id="install-btn-browser" class="app-card-btn" onclick="startInstall('browser')">GET</button>
+                        <div id="install-prog-browser" class="install-progress-wrapper">
+                            <div id="install-fill-browser" class="install-progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <!-- Terminal App Card -->
+                    <div class="app-card">
+                        <div class="app-card-icon bg-gray-900 text-white"><i class="fa-solid fa-terminal"></i></div>
+                        <div class="app-card-info">
+                            <div class="text-lg font-bold text-gray-800">Terminal</div>
+                            <div class="text-sm text-gray-500">Command line interface.</div>
+                        </div>
+                        <button id="install-btn-terminal" class="app-card-btn installed" onclick="toggleWindow('terminal')">OPEN</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculator Window -->
+        <div id="window-calculator" class="os-window glass-panel" style="background: #333;">
+            <div class="window-header" style="background: #333; border-bottom: none;">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeWindow('calculator')"><i class="fa-solid fa-xmark"></i></div>
+                    <div class="traffic-light minimize" onclick="closeWindow('calculator')"><i class="fa-solid fa-minus"></i></div>
+                    <div class="traffic-light maximize" onclick="toggleMaximize('calculator')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+                </div>
+            </div>
+            <div class="flex flex-col h-full">
+                <div id="calc-display">0</div>
+                <div class="calc-grid">
+                    <button class="calc-btn top-op" onclick="calcAction('clear')">AC</button>
+                    <button class="calc-btn top-op" onclick="calcAction('negate')">+/-</button>
+                    <button class="calc-btn top-op" onclick="calcAction('percent')">%</button>
+                    <button class="calc-btn op" onclick="calcAction('/')">÷</button>
+                    
+                    <button class="calc-btn" onclick="calcAppend('7')">7</button>
+                    <button class="calc-btn" onclick="calcAppend('8')">8</button>
+                    <button class="calc-btn" onclick="calcAppend('9')">9</button>
+                    <button class="calc-btn op" onclick="calcAction('*')">×</button>
+                    
+                    <button class="calc-btn" onclick="calcAppend('4')">4</button>
+                    <button class="calc-btn" onclick="calcAppend('5')">5</button>
+                    <button class="calc-btn" onclick="calcAppend('6')">6</button>
+                    <button class="calc-btn op" onclick="calcAction('-')">-</button>
+                    
+                    <button class="calc-btn" onclick="calcAppend('1')">1</button>
+                    <button class="calc-btn" onclick="calcAppend('2')">2</button>
+                    <button class="calc-btn" onclick="calcAppend('3')">3</button>
+                    <button class="calc-btn op" onclick="calcAction('+')">+</button>
+                    
+                    <button class="calc-btn zero" onclick="calcAppend('0')">0</button>
+                    <button class="calc-btn" onclick="calcAppend('.')">.</button>
+                    <button class="calc-btn op" onclick="calcAction('=')">=</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Browser Window -->
+        <div id="window-browser" class="os-window glass-panel">
+            <div class="window-header">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeWindow('browser')"><i class="fa-solid fa-xmark"></i></div>
+                    <div class="traffic-light minimize" onclick="closeWindow('browser')"><i class="fa-solid fa-minus"></i></div>
+                    <div class="traffic-light maximize" onclick="toggleMaximize('browser')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+                </div>
+                <div class="flex-1 flex justify-center px-4">
+                    <div class="w-2/3 bg-black/10 rounded-md text-center py-1 text-xs text-gray-600 font-medium overflow-hidden text-ellipsis whitespace-nowrap">
+                        <i class="fa-solid fa-lock text-gray-400 mr-1"></i> https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/
+                    </div>
+                </div>
+            </div>
+            <div class="window-content p-0" style="background: white;">
+                <!-- Embedded exactly as requested -->
+                <iframe src="https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+
+        <!-- Terminal Window -->
+        <div id="window-terminal" class="os-window glass-panel" style="background: rgba(30,30,30,0.95); backdrop-filter: blur(20px);">
+            <div class="window-header" style="background: rgba(50,50,50,0.5); border-bottom: 1px solid rgba(0,0,0,0.5);">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeWindow('terminal')"><i class="fa-solid fa-xmark"></i></div>
+                    <div class="traffic-light minimize" onclick="closeWindow('terminal')"><i class="fa-solid fa-minus"></i></div>
+                    <div class="traffic-light maximize" onclick="toggleMaximize('terminal')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+                </div>
+                <div class="window-title" style="color: #ccc;">guest — -bash — 80x24</div>
+            </div>
+            <div class="window-content flex flex-col font-mono text-[13px] text-gray-200 p-3 overflow-y-auto cursor-text" style="background: transparent;" onclick="document.getElementById('term-input').focus()">
+                <div class="mb-2 text-gray-400">
+                    Last login: <span id="term-login-time"></span> on ttys000<br>
+                    Welcome to Wave OS terminal. Type 'help' to see available commands.
+                </div>
+                <div id="term-output"></div>
+                <div class="flex items-center mt-1">
+                    <span class="mr-2 font-bold">guest@waveos ~ %</span>
+                    <input type="text" id="term-input" class="flex-1 bg-transparent border-none outline-none text-gray-200 font-mono" autocomplete="off" spellcheck="false" onkeydown="handleTerminalCommand(event)">
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="dock-container">
+        <nav id="dock" class="glass">
+            <!-- Pre-installed App Store -->
+            <div class="dock-icon text-blue-500 bg-white" onclick="toggleWindow('appstore')" id="dock-appstore" title="App Store">
+                <i class="fa-brands fa-app-store-ios"></i>
+            </div>
+            
+            <!-- Hidden by default until installed -->
+            <div class="dock-icon text-white bg-orange-400 hidden-app" onclick="toggleWindow('calculator')" id="dock-calculator" title="Calculator">
+                <i class="fa-solid fa-calculator"></i>
+            </div>
+            <div class="dock-icon text-white bg-blue-500 hidden-app" onclick="toggleWindow('browser')" id="dock-browser" title="Browser">
+                <i class="fa-regular fa-compass"></i>
+            </div>
+            
+            <!-- Pre-installed Terminal -->
+            <div class="dock-icon text-white bg-gray-900" onclick="toggleWindow('terminal')" id="dock-terminal" title="Terminal">
+                <i class="fa-solid fa-terminal"></i>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        // --- Fullscreen Toggle Logic ---
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error("Error attempting to enable fullscreen:", err.message);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // --- Boot Sequence & Audio ---
+        function startBootSequence() {
+            // Hide power screen
+            const powerScreen = document.getElementById('power-screen');
+            powerScreen.style.opacity = '0';
+            setTimeout(() => {
+                powerScreen.style.display = 'none';
+            }, 500);
+
+            // Show and start boot screen
+            const bootScreen = document.getElementById('boot-screen');
+            bootScreen.style.display = 'flex';
+            document.getElementById('loading-progress').classList.add('run-boot-anim');
+
+            // 5 seconds boot screen delay
+            setTimeout(() => {
+                // Play quick, loud synthesized wave crash using Web Audio API
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        const audioCtx = new AudioContext();
+                        
+                        // Create white noise buffer
+                        const bufferSize = audioCtx.sampleRate * 1.5; // 1.5 seconds length
+                        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                        const data = buffer.getChannelData(0);
+                        for (let i = 0; i < bufferSize; i++) {
+                            data[i] = Math.random() * 2 - 1;
+                        }
+                        
+                        const noiseSource = audioCtx.createBufferSource();
+                        noiseSource.buffer = buffer;
+                        
+                        // Lowpass filter to simulate water crash, sweeping down
+                        const filter = audioCtx.createBiquadFilter();
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(1500, audioCtx.currentTime);
+                        filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 1.5);
+                        
+                        // Envelope: Very fast, loud attack with a quick decay
+                        const gainNode = audioCtx.createGain();
+                        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+                        gainNode.gain.linearRampToValueAtTime(2.0, audioCtx.currentTime + 0.05); // Loud and quick
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5); // Decay
+                        
+                        noiseSource.connect(filter);
+                        filter.connect(gainNode);
+                        gainNode.connect(audioCtx.destination);
+                        
+                        noiseSource.start();
+                    }
+                } catch(e) {
+                    console.log('Audio synthesis failed:', e);
+                }
+                
+                // Fade out boot screen
+                bootScreen.style.opacity = '0';
+                setTimeout(() => {
+                    bootScreen.style.visibility = 'hidden';
+                    bootScreen.style.display = 'none';
+                }, 1000);
+            }, 5000); 
+        }
+
+        // --- Window Management Variables ---
+        let zIndexCounter = 100;
+        const windowStates = {}; // Stores pre-maximize dimensions
+        
+        // --- App Store Logic ---
+        function startInstall(appId) {
+            const btn = document.getElementById(`install-btn-${appId}`);
+            const progWrapper = document.getElementById(`install-prog-${appId}`);
+            const progFill = document.getElementById(`install-fill-${appId}`);
+            
+            if(!btn || !progWrapper || !progFill) return;
+            
+            // Show progress bar instead of button
+            btn.style.display = 'none';
+            progWrapper.style.display = 'block';
+            
+            // Force reflow to ensure CSS transition triggers properly
+            void progFill.offsetWidth;
+            
+            // Start 5 second animation
+            progFill.style.width = '100%';
+            
+            setTimeout(() => {
+                // Hide progress, show button as installed
+                progWrapper.style.display = 'none';
+                btn.style.display = 'block';
+                installApp(appId);
+            }, 5000);
+        }
+
+        function installApp(appId) {
+            // Unhide from dock
+            const dockIcon = document.getElementById(`dock-${appId}`);
+            if(dockIcon) dockIcon.classList.remove('hidden-app');
+            
+            // Update button UI
+            const btn = document.getElementById(`install-btn-${appId}`);
+            if(btn) {
+                btn.innerText = 'OPEN';
+                btn.classList.add('installed');
+                btn.onclick = () => toggleWindow(appId);
+            }
+
+            // Pop animation on dock icon
+            if(dockIcon) {
+                dockIcon.style.transform = 'scale(1.3) translateY(-10px)';
+                setTimeout(() => dockIcon.style.transform = '', 300);
+            }
+        }
+
+        function toggleWindow(appId) {
+            const win = document.getElementById(`window-${appId}`);
+            const dockIcon = document.getElementById(`dock-${appId}`);
+            
+            if (win.classList.contains('open')) {
+                if (parseInt(win.style.zIndex) === zIndexCounter) {
+                    closeWindow(appId);
+                } else {
+                    bringToFront(win);
+                }
+            } else {
+                win.classList.add('open');
+                if(dockIcon) dockIcon.classList.add('active');
+                
+                // Centering initial position for better UX
+                if (!win.style.top) {
+                    const desktop = document.getElementById('desktop-area');
+                    const dw = desktop.clientWidth;
+                    const dh = desktop.clientHeight;
+                    const ww = win.clientWidth || 700;
+                    const wh = win.clientHeight || 450;
+                    
+                    win.style.top = `${Math.max(10, (dh - wh) / 2 + (Math.random() * 40 - 20))}px`;
+                    win.style.left = `${Math.max(10, (dw - ww) / 2 + (Math.random() * 40 - 20))}px`;
+                }
+                
+                bringToFront(win);
+
+                // Auto focus terminal input if opened
+                if (appId === 'terminal') {
+                    setTimeout(() => document.getElementById('term-input').focus(), 100);
+                }
+            }
+        }
+
+        function closeWindow(appId) {
+            const win = document.getElementById(`window-${appId}`);
+            const dockIcon = document.getElementById(`dock-${appId}`);
+            win.classList.remove('open');
+            if(dockIcon) dockIcon.classList.remove('active');
+        }
+
+        function toggleMaximize(appId) {
+            const win = document.getElementById(`window-${appId}`);
+            if (!win) return;
+
+            bringToFront(win);
+
+            if (!windowStates[appId]) {
+                windowStates[appId] = {
+                    top: win.style.top,
+                    left: win.style.left,
+                    width: win.style.width,
+                    height: win.style.height,
+                    maximized: false
+                };
+            }
+
+            const state = windowStates[appId];
+
+            if (!state.maximized) {
+                // Save current box before maxing
+                state.top = win.style.top;
+                state.left = win.style.left;
+                state.width = win.style.width || `${win.clientWidth}px`;
+                state.height = win.style.height || `${win.clientHeight}px`;
+
+                // Maximize window within desktop area (leaving space for dock at bottom)
+                win.style.top = '10px';
+                win.style.left = '10px';
+                win.style.width = 'calc(100vw - 20px)';
+                win.style.height = 'calc(100vh - 90px)';
+                state.maximized = true;
+            } else {
+                // Restore previous dimensions
+                win.style.top = state.top;
+                win.style.left = state.left;
+                win.style.width = state.width;
+                win.style.height = state.height;
+                state.maximized = false;
+            }
+        }
+
+        function bringToFront(element) {
+            zIndexCounter++;
+            element.style.zIndex = zIndexCounter;
+        }
+
+        // Make all windows draggable
+        const windows = document.querySelectorAll('.os-window');
+        windows.forEach(win => {
+            win.addEventListener('mousedown', () => bringToFront(win));
+            win.addEventListener('touchstart', () => bringToFront(win), {passive: true});
+            const header = win.querySelector('.window-header');
+            makeDraggable(win, header);
+        });
+
+        function makeDraggable(element, handle) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+            
+            // Mouse Events
+            handle.onmousedown = dragMouseDown;
+            // Touch Events
+            handle.addEventListener('touchstart', dragTouchStart, {passive: false});
+
+            function dragMouseDown(e) {
+                if(e.target.closest('.traffic-lights')) return;
+                const appId = element.id.replace('window-', '');
+                if (windowStates[appId] && windowStates[appId].maximized) return; // Prevent dragging while maximized
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+                bringToFront(element);
+            }
+
+            function dragTouchStart(e) {
+                if(e.target.closest('.traffic-lights')) return;
+                const appId = element.id.replace('window-', '');
+                if (windowStates[appId] && windowStates[appId].maximized) return;
+                const touch = e.touches[0];
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                document.addEventListener('touchend', closeDragElement);
+                document.addEventListener('touchmove', elementTouchDrag, {passive: false});
+                bringToFront(element);
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                updatePosition();
+            }
+
+            function elementTouchDrag(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                pos1 = pos3 - touch.clientX;
+                pos2 = pos4 - touch.clientY;
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                updatePosition();
+            }
+
+            function updatePosition() {
+                let newTop = element.offsetTop - pos2;
+                let newLeft = element.offsetLeft - pos1;
+                if (newTop < 0) newTop = 0;
+                element.style.top = newTop + "px";
+                element.style.left = newLeft + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+                document.removeEventListener('touchend', closeDragElement);
+                document.removeEventListener('touchmove', elementTouchDrag);
+            }
+        }
+
+        // --- Terminal Logic ---
+        document.getElementById('term-login-time').innerText = new Date().toString().substring(0, 24);
+        
+        function handleTerminalCommand(e) {
+            if (e.key === 'Enter') {
+                const inputElement = e.target;
+                const cmdString = inputElement.value.trim();
+                const outputDiv = document.getElementById('term-output');
+                
+                const logEntry = document.createElement('div');
+                logEntry.innerHTML = `<span class="font-bold">guest@waveos ~ %</span> ${cmdString.replace(/</g, '&lt;')}`;
+                outputDiv.appendChild(logEntry);
+                
+                if (cmdString !== '') {
+                    const parts = cmdString.split(' ');
+                    const command = parts[0].toLowerCase();
+                    const args = parts.slice(1);
+                    
+                    const response = document.createElement('div');
+                    response.className = 'mb-1 text-gray-300';
+                    
+                    switch (command) {
+                        case 'help':
+                            response.innerHTML = `Available commands:<br>
+                                &nbsp;&nbsp;help&nbsp;&nbsp;&nbsp;&nbsp;- Show this help message<br>
+                                &nbsp;&nbsp;echo&nbsp;&nbsp;&nbsp;&nbsp;- Print text to terminal<br>
+                                &nbsp;&nbsp;date&nbsp;&nbsp;&nbsp;&nbsp;- Show current date and time<br>
+                                &nbsp;&nbsp;whoami&nbsp;&nbsp;- Display current user<br>
+                                &nbsp;&nbsp;clear&nbsp;&nbsp;&nbsp;- Clear the terminal screen`;
+                            outputDiv.appendChild(response);
+                            break;
+                        case 'echo':
+                            response.innerText = args.join(' ');
+                            outputDiv.appendChild(response);
+                            break;
+                        case 'date':
+                            response.innerText = new Date().toString();
+                            outputDiv.appendChild(response);
+                            break;
+                        case 'whoami':
+                            response.innerText = 'guest';
+                            outputDiv.appendChild(response);
+                            break;
+                        case 'clear':
+                            outputDiv.innerHTML = '';
+                            break;
+                        default:
+                            response.innerText = `-bash: ${command}: command not found`;
+                            outputDiv.appendChild(response);
+                    }
+                }
+                
+                inputElement.value = '';
+                const termContent = outputDiv.parentElement;
+                termContent.scrollTop = termContent.scrollHeight;
+            }
+        }
+
+        // --- Calculator Logic ---
+        let calcValue = '0';
+        let calcFirstOperand = null;
+        let calcOperator = null;
+        let calcWaitingForSecondOperand = false;
+
+        function updateCalcDisplay() {
+            let displayVal = calcValue;
+            if (displayVal.length > 9) {
+                displayVal = parseFloat(displayVal).toPrecision(9);
+            }
+            document.getElementById('calc-display').innerText = displayVal;
+        }
+
+        function calcAppend(digit) {
+            if (calcWaitingForSecondOperand) {
+                calcValue = digit;
+                calcWaitingForSecondOperand = false;
+            } else {
+                calcValue = calcValue === '0' ? digit : calcValue + digit;
+            }
+            updateCalcDisplay();
+        }
+
+        function calcAction(action) {
+            const inputValue = parseFloat(calcValue);
+
+            if (action === 'clear') {
+                calcValue = '0';
+                calcFirstOperand = null;
+                calcOperator = null;
+                calcWaitingForSecondOperand = false;
+            } else if (action === 'negate') {
+                calcValue = String(inputValue * -1);
+            } else if (action === 'percent') {
+                calcValue = String(inputValue / 100);
+            } else if (action === '=') {
+                if (calcOperator && calcFirstOperand != null) {
+                    const result = performCalculation[calcOperator](calcFirstOperand, inputValue);
+                    calcValue = String(result);
+                    calcFirstOperand = result;
+                    calcOperator = null;
+                    calcWaitingForSecondOperand = true;
+                }
+            } else { 
+                if (calcOperator && calcWaitingForSecondOperand) {
+                    calcOperator = action;
+                    return;
+                }
+                
+                if (calcFirstOperand == null && !isNaN(inputValue)) {
+                    calcFirstOperand = inputValue;
+                } else if (calcOperator) {
+                    const result = performCalculation[calcOperator](calcFirstOperand, inputValue);
+                    calcValue = String(result);
+                    calcFirstOperand = result;
+                }
+                
+                calcOperator = action;
+                calcWaitingForSecondOperand = true;
+            }
+            updateCalcDisplay();
+        }
+
+        const performCalculation = {
+            '/': (first, second) => first / second,
+            '*': (first, second) => first * second,
+            '+': (first, second) => first + second,
+            '-': (first, second) => first - second,
+        };
+
+        // --- Clock Update Logic ---
+        function updateClock() {
+            const now = new Date();
+            const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+            const timeString = now.toLocaleDateString('en-US', options).replace(/,/g, '');
+            document.getElementById('clock').textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+    </script>
+</body>
+</html>
