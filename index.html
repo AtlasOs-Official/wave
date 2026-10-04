@@ -202,15 +202,14 @@
         .dock-icon {
             width: 52px;
             height: 52px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.2);
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             position: relative;
             transition: transform 0.2s, width 0.2s, height 0.2s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .dock-icon:hover {
@@ -218,15 +217,22 @@
         }
 
         .dock-icon img {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             object-fit: contain;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
 
+        /* COLORFUL APP BACKGROUNDS FOR DOCK */
+        .dock-appstore { background: linear-gradient(135deg, #00c6ff, #0072ff); }
+        .dock-calculator { background: linear-gradient(135deg, #ff9966, #ff5e62); }
+        .dock-browser { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .dock-minecraft { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+        .dock-terminal { background: linear-gradient(135deg, #232526, #414345); }
+
         .dock-dot {
             position: absolute;
-            bottom: -4px;
+            bottom: -5px;
             width: 4px;
             height: 4px;
             background: #fff;
@@ -418,7 +424,7 @@
         .app-card-icon {
             width: 48px;
             height: 48px;
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -670,17 +676,13 @@
         <!-- DOCK -->
         <div id="dock-container">
             <div id="dock">
-                <div class="dock-icon" title="App Store" onclick="openWindow('appstore')">
+                <div class="dock-icon dock-appstore" title="App Store" onclick="openWindow('appstore')">
                     <img src="https://api.iconify.design/fluent:app-store-24-filled.svg?color=%23ffffff" alt="App Store">
                     <div class="dock-dot" id="dot-appstore"></div>
                 </div>
-                <div class="dock-icon" title="Calculator" onclick="openWindow('calculator')">
-                    <img src="https://api.iconify.design/fluent:calculator-24-filled.svg?color=%23ffffff" alt="Calculator">
-                    <div class="dock-dot" id="dot-calculator"></div>
-                </div>
                 <!-- Dynamic Installed Apps Container -->
                 <div id="installed-dock-apps" style="display: flex; gap: 12px;"></div>
-                <div class="dock-icon" title="Terminal" onclick="openWindow('terminal')">
+                <div class="dock-icon dock-terminal" title="Terminal" onclick="openWindow('terminal')">
                     <img src="https://api.iconify.design/fluent:chevron-right-24-filled.svg?color=%23ffffff" alt="Terminal">
                     <div class="dock-dot" id="dot-terminal"></div>
                 </div>
@@ -711,20 +713,21 @@
                             <!-- Calculator -->
                             <div class="app-card">
                                 <div class="app-card-info">
-                                    <div class="app-card-icon" style="background: #ff9f0a;">🔢</div>
+                                    <div class="app-card-icon" style="background: linear-gradient(135deg, #ff9966, #ff5e62);">🔢</div>
                                     <div class="app-card-text">
                                         <h4>Calculator</h4>
                                         <p>Perform basic mathematics.</p>
                                     </div>
                                 </div>
                                 <div class="install-container">
-                                    <button class="install-btn installed" id="btn-install-calculator">INSTALLED</button>
+                                    <button class="install-btn" id="btn-install-calculator" onclick="installApp('calculator')">GET</button>
+                                    <div class="progress-bar-container" id="prog-calculator"><div class="progress-bar-fill" id="fill-calculator"></div></div>
                                 </div>
                             </div>
                             <!-- Browser -->
                             <div class="app-card">
                                 <div class="app-card-info">
-                                    <div class="app-card-icon" style="background: #007aff;">🌐</div>
+                                    <div class="app-card-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">🌐</div>
                                     <div class="app-card-text">
                                         <h4>Browser</h4>
                                         <p>Surf the web securely via proxy.</p>
@@ -738,7 +741,7 @@
                             <!-- Minecraft -->
                             <div class="app-card">
                                 <div class="app-card-info">
-                                    <div class="app-card-icon" style="background: #27c93f;">⛏️</div>
+                                    <div class="app-card-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">⛏️️</div>
                                     <div class="app-card-text">
                                         <h4>Minecraft</h4>
                                         <p>Play browser-based Minecraft sandbox.</p>
@@ -972,7 +975,7 @@
 
         // INSTALLED APPS STATE
         const installedApps = {
-            calculator: true,
+            calculator: false,
             browser: false,
             minecraft: false,
             terminal: true
@@ -1014,9 +1017,17 @@
             const container = document.getElementById('installed-dock-apps');
             container.innerHTML = '';
             
+            if (installedApps.calculator) {
+                container.innerHTML += `
+                    <div class="dock-icon dock-calculator" title="Calculator" onclick="openWindow('calculator')">
+                        <img src="https://api.iconify.design/fluent:calculator-24-filled.svg?color=%23ffffff" alt="Calculator">
+                        <div class="dock-dot" id="dot-calculator"></div>
+                    </div>
+                `;
+            }
             if (installedApps.browser) {
                 container.innerHTML += `
-                    <div class="dock-icon" title="Browser" onclick="openWindow('browser')">
+                    <div class="dock-icon dock-browser" title="Browser" onclick="openWindow('browser')">
                         <img src="https://api.iconify.design/fluent:globe-24-filled.svg?color=%23ffffff" alt="Browser">
                         <div class="dock-dot" id="dot-browser"></div>
                     </div>
@@ -1024,7 +1035,7 @@
             }
             if (installedApps.minecraft) {
                 container.innerHTML += `
-                    <div class="dock-icon" title="Minecraft" onclick="openWindow('minecraft')">
+                    <div class="dock-icon dock-minecraft" title="Minecraft" onclick="openWindow('minecraft')">
                         <img src="https://api.iconify.design/fluent:cube-24-filled.svg?color=%23ffffff" alt="Minecraft">
                         <div class="dock-dot" id="dot-minecraft"></div>
                     </div>
