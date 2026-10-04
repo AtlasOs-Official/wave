@@ -107,7 +107,7 @@
         }
 
         .glass-panel {
-            background: rgba(250, 250, 250, 0.7);
+            background: rgba(250, 250, 250, 0.85);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.4);
@@ -208,29 +208,25 @@
             display: none;
             flex-direction: column;
             overflow: hidden;
-            transform: scale(0.95);
-            opacity: 0;
-            transition: transform 0.2s ease, opacity 0.2s ease;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         }
 
         .os-window.open {
             display: flex;
-            transform: scale(1);
-            opacity: 1;
         }
 
         .window-header {
-            height: 48px;
+            height: 40px;
             display: flex;
             align-items: center;
             padding: 0 16px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
             cursor: pointer;
             position: relative;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
             flex-shrink: 0;
+            user-select: none;
         }
 
         .traffic-lights {
@@ -272,19 +268,20 @@
             pointer-events: none;
         }
 
-        .window-content {
+        .window-body {
             flex: 1;
-            overflow: auto;
-            position: relative;
             display: flex;
-            background: rgba(255, 255, 255, 0.6);
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
         }
 
-        /* Specific App Sizing */
-        #window-calculator { width: 232px; height: 320px; }
-        #window-browser { width: 900px; height: 600px; max-width: 95vw; max-height: 80vh; }
-        #window-appstore { width: 750px; height: 500px; max-width: 95vw; max-height: 80vh;}
-        #window-terminal { width: 600px; height: 400px; max-width: 95vw; max-height: 80vh;}
+        /* Specific App Default Sizing */
+        #window-calculator { width: 240px; height: 340px; }
+        #window-browser { width: 900px; height: 600px; max-width: 95vw; max-height: 85vh; }
+        #window-minecraft { width: 900px; height: 600px; max-width: 95vw; max-height: 85vh; }
+        #window-appstore { width: 780px; height: 520px; max-width: 95vw; max-height: 85vh; }
+        #window-terminal { width: 640px; height: 420px; max-width: 95vw; max-height: 85vh; }
 
         /* Calculator Styles */
         .calc-grid {
@@ -322,10 +319,11 @@
             display: flex;
             align-items: flex-end;
             justify-content: flex-end;
+            flex-shrink: 0;
         }
 
         /* App Store Styles */
-        .app-store-sidebar { width: 200px; border-right: 1px solid rgba(0,0,0,0.1); padding: 20px 10px; }
+        .app-store-sidebar { width: 200px; border-right: 1px solid rgba(0,0,0,0.1); padding: 20px 10px; flex-shrink: 0; }
         .app-store-main { flex: 1; padding: 30px; overflow-y: auto; }
         .app-card {
             display: flex;
@@ -363,11 +361,6 @@
             transition: width 5s linear;
         }
 
-        /* Terminal specific styles */
-        #term-input {
-            width: 100%;
-        }
-
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -382,7 +375,6 @@
 </head>
 <body>
 
-    <!-- Power Screen (Required for Audio Autoplay) -->
     <div id="power-screen">
         <button class="power-btn" onclick="startBootSequence()" title="Power On">
             <i class="fa-solid fa-power-off"></i>
@@ -390,7 +382,6 @@
         <div class="text-white/50 mt-6 text-sm font-light">Press to Power On Wave OS</div>
     </div>
 
-    <!-- Boot Screen -->
     <div id="boot-screen">
         <i class="fa-solid fa-water boot-logo"></i>
         <div class="loading-bar-container">
@@ -398,7 +389,6 @@
         </div>
     </div>
 
-    <!-- Menu Bar -->
     <nav id="menubar">
         <div class="flex items-center gap-1 overflow-x-auto whitespace-nowrap hide-scrollbar">
             <div class="menu-item font-bold text-lg cursor-pointer"><i class="fa-solid fa-water text-blue-600"></i></div>
@@ -421,7 +411,6 @@
         </div>
     </nav>
 
-    <!-- Window Container -->
     <div id="desktop-area" class="relative w-full h-[calc(100vh-28px)]">
         
         <!-- App Store Window -->
@@ -434,7 +423,7 @@
                 </div>
                 <div class="window-title">App Store</div>
             </div>
-            <div class="window-content">
+            <div class="window-body flex flex-row">
                 <div class="app-store-sidebar bg-white/40">
                     <div class="text-xl font-bold mb-6 px-2">Discover</div>
                     <div class="sidebar-item bg-blue-100 text-blue-600 font-medium p-2 rounded-lg mb-2"><i class="fa-solid fa-rocket mr-2"></i> Featured</div>
@@ -470,6 +459,19 @@
                         </div>
                     </div>
 
+                    <!-- Minecraft App Card -->
+                    <div class="app-card">
+                        <div class="app-card-icon bg-emerald-600 text-white"><i class="fa-solid fa-cube"></i></div>
+                        <div class="app-card-info">
+                            <div class="text-lg font-bold text-gray-800">Minecraft</div>
+                            <div class="text-sm text-gray-500">Classic browser sandbox game.</div>
+                        </div>
+                        <button id="install-btn-minecraft" class="app-card-btn" onclick="startInstall('minecraft')">GET</button>
+                        <div id="install-prog-minecraft" class="install-progress-wrapper">
+                            <div id="install-fill-minecraft" class="install-progress-fill"></div>
+                        </div>
+                    </div>
+
                     <!-- Terminal App Card -->
                     <div class="app-card">
                         <div class="app-card-icon bg-gray-900 text-white"><i class="fa-solid fa-terminal"></i></div>
@@ -493,7 +495,7 @@
                     <div class="traffic-light maximize" onclick="toggleMaximize('calculator')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
                 </div>
             </div>
-            <div class="flex flex-col h-full">
+            <div class="window-body">
                 <div id="calc-display">0</div>
                 <div class="calc-grid">
                     <button class="calc-btn top-op" onclick="calcAction('clear')">AC</button>
@@ -537,9 +539,27 @@
                     </div>
                 </div>
             </div>
-            <div class="window-content p-0" style="background: white;">
-                <!-- Embedded exactly as requested -->
-                <iframe src="https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/" style="width: 100%; height: 100%; border: none;"></iframe>
+            <div class="window-body" style="background: white;">
+                <iframe src="https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/" style="width: 100%; height: 100%; border: none; flex: 1;"></iframe>
+            </div>
+        </div>
+
+        <!-- Minecraft Window -->
+        <div id="window-minecraft" class="os-window glass-panel">
+            <div class="window-header">
+                <div class="traffic-lights">
+                    <div class="traffic-light close" onclick="closeWindow('minecraft')"><i class="fa-solid fa-xmark"></i></div>
+                    <div class="traffic-light minimize" onclick="closeWindow('minecraft')"><i class="fa-solid fa-minus"></i></div>
+                    <div class="traffic-light maximize" onclick="toggleMaximize('minecraft')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
+                </div>
+                <div class="flex-1 flex justify-center px-4">
+                    <div class="w-2/3 bg-black/10 rounded-md text-center py-1 text-xs text-gray-600 font-medium overflow-hidden text-ellipsis whitespace-nowrap">
+                        <i class="fa-solid fa-lock text-gray-400 mr-1"></i> https://ajgplayz-studio.github.io/Arcade-hub/minecraft.html
+                    </div>
+                </div>
+            </div>
+            <div class="window-body" style="background: black;">
+                <iframe src="https://ajgplayz-studio.github.io/Arcade-hub/minecraft.html" style="width: 100%; height: 100%; border: none; flex: 1;"></iframe>
             </div>
         </div>
 
@@ -553,7 +573,7 @@
                 </div>
                 <div class="window-title" style="color: #ccc;">guest — -bash — 80x24</div>
             </div>
-            <div class="window-content flex flex-col font-mono text-[13px] text-gray-200 p-3 overflow-y-auto cursor-text" style="background: transparent;" onclick="document.getElementById('term-input').focus()">
+            <div class="window-body flex flex-col font-mono text-[13px] text-gray-200 p-3 overflow-y-auto cursor-text" style="background: transparent;" onclick="document.getElementById('term-input').focus()">
                 <div class="mb-2 text-gray-400">
                     Last login: <span id="term-login-time"></span> on ttys000<br>
                     Welcome to Wave OS terminal. Type 'help' to see available commands.
@@ -570,20 +590,20 @@
 
     <div id="dock-container">
         <nav id="dock" class="glass">
-            <!-- Pre-installed App Store -->
             <div class="dock-icon text-blue-500 bg-white" onclick="toggleWindow('appstore')" id="dock-appstore" title="App Store">
                 <i class="fa-brands fa-app-store-ios"></i>
             </div>
             
-            <!-- Hidden by default until installed -->
             <div class="dock-icon text-white bg-orange-400 hidden-app" onclick="toggleWindow('calculator')" id="dock-calculator" title="Calculator">
                 <i class="fa-solid fa-calculator"></i>
             </div>
             <div class="dock-icon text-white bg-blue-500 hidden-app" onclick="toggleWindow('browser')" id="dock-browser" title="Browser">
                 <i class="fa-regular fa-compass"></i>
             </div>
+            <div class="dock-icon text-white bg-emerald-600 hidden-app" onclick="toggleWindow('minecraft')" id="dock-minecraft" title="Minecraft">
+                <i class="fa-solid fa-cube"></i>
+            </div>
             
-            <!-- Pre-installed Terminal -->
             <div class="dock-icon text-white bg-gray-900" onclick="toggleWindow('terminal')" id="dock-terminal" title="Terminal">
                 <i class="fa-solid fa-terminal"></i>
             </div>
@@ -591,7 +611,6 @@
     </div>
 
     <script>
-        // --- Fullscreen Toggle Logic ---
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
@@ -604,30 +623,23 @@
             }
         }
 
-        // --- Boot Sequence & Audio ---
         function startBootSequence() {
-            // Hide power screen
             const powerScreen = document.getElementById('power-screen');
             powerScreen.style.opacity = '0';
             setTimeout(() => {
                 powerScreen.style.display = 'none';
             }, 500);
 
-            // Show and start boot screen
             const bootScreen = document.getElementById('boot-screen');
             bootScreen.style.display = 'flex';
             document.getElementById('loading-progress').classList.add('run-boot-anim');
 
-            // 5 seconds boot screen delay
             setTimeout(() => {
-                // Play quick, loud synthesized wave crash using Web Audio API
                 try {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     if (AudioContext) {
                         const audioCtx = new AudioContext();
-                        
-                        // Create white noise buffer
-                        const bufferSize = audioCtx.sampleRate * 1.5; // 1.5 seconds length
+                        const bufferSize = audioCtx.sampleRate * 1.5;
                         const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
                         const data = buffer.getChannelData(0);
                         for (let i = 0; i < bufferSize; i++) {
@@ -637,17 +649,15 @@
                         const noiseSource = audioCtx.createBufferSource();
                         noiseSource.buffer = buffer;
                         
-                        // Lowpass filter to simulate water crash, sweeping down
                         const filter = audioCtx.createBiquadFilter();
                         filter.type = 'lowpass';
                         filter.frequency.setValueAtTime(1500, audioCtx.currentTime);
                         filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 1.5);
                         
-                        // Envelope: Very fast, loud attack with a quick decay
                         const gainNode = audioCtx.createGain();
                         gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-                        gainNode.gain.linearRampToValueAtTime(2.0, audioCtx.currentTime + 0.05); // Loud and quick
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5); // Decay
+                        gainNode.gain.linearRampToValueAtTime(2.0, audioCtx.currentTime + 0.05);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
                         
                         noiseSource.connect(filter);
                         filter.connect(gainNode);
@@ -659,7 +669,6 @@
                     console.log('Audio synthesis failed:', e);
                 }
                 
-                // Fade out boot screen
                 bootScreen.style.opacity = '0';
                 setTimeout(() => {
                     bootScreen.style.visibility = 'hidden';
@@ -668,11 +677,9 @@
             }, 5000); 
         }
 
-        // --- Window Management Variables ---
         let zIndexCounter = 100;
-        const windowStates = {}; // Stores pre-maximize dimensions
+        const windowStates = {}; 
         
-        // --- App Store Logic ---
         function startInstall(appId) {
             const btn = document.getElementById(`install-btn-${appId}`);
             const progWrapper = document.getElementById(`install-prog-${appId}`);
@@ -680,18 +687,12 @@
             
             if(!btn || !progWrapper || !progFill) return;
             
-            // Show progress bar instead of button
             btn.style.display = 'none';
             progWrapper.style.display = 'block';
-            
-            // Force reflow to ensure CSS transition triggers properly
             void progFill.offsetWidth;
-            
-            // Start 5 second animation
             progFill.style.width = '100%';
             
             setTimeout(() => {
-                // Hide progress, show button as installed
                 progWrapper.style.display = 'none';
                 btn.style.display = 'block';
                 installApp(appId);
@@ -699,11 +700,9 @@
         }
 
         function installApp(appId) {
-            // Unhide from dock
             const dockIcon = document.getElementById(`dock-${appId}`);
             if(dockIcon) dockIcon.classList.remove('hidden-app');
             
-            // Update button UI
             const btn = document.getElementById(`install-btn-${appId}`);
             if(btn) {
                 btn.innerText = 'OPEN';
@@ -711,7 +710,6 @@
                 btn.onclick = () => toggleWindow(appId);
             }
 
-            // Pop animation on dock icon
             if(dockIcon) {
                 dockIcon.style.transform = 'scale(1.3) translateY(-10px)';
                 setTimeout(() => dockIcon.style.transform = '', 300);
@@ -732,7 +730,6 @@
                 win.classList.add('open');
                 if(dockIcon) dockIcon.classList.add('active');
                 
-                // Centering initial position for better UX
                 if (!win.style.top || windowStates[appId]?.maximized) {
                     const desktop = document.getElementById('desktop-area');
                     const dw = desktop.clientWidth;
@@ -746,7 +743,6 @@
                 
                 bringToFront(win);
 
-                // Auto focus terminal input if opened
                 if (appId === 'terminal') {
                     setTimeout(() => document.getElementById('term-input').focus(), 100);
                 }
@@ -780,14 +776,12 @@
             const state = windowStates[appId];
 
             if (!state.maximized) {
-                // Save current box before maxing
                 state.top = win.style.top;
                 state.left = win.style.left;
                 state.width = win.style.width || `${win.clientWidth}px`;
                 state.height = win.style.height || `${win.clientHeight}px`;
                 state.borderRadius = win.style.borderRadius;
 
-                // Maximize window to true viewport coverage
                 win.style.position = 'fixed';
                 win.style.top = '0px';
                 win.style.left = '0px';
@@ -797,7 +791,6 @@
                 win.style.zIndex = '9999';
                 state.maximized = true;
             } else {
-                // Restore previous dimensions
                 win.style.position = 'absolute';
                 win.style.top = state.top;
                 win.style.left = state.left;
@@ -819,7 +812,6 @@
             element.style.zIndex = zIndexCounter;
         }
 
-        // Make all windows draggable
         const windows = document.querySelectorAll('.os-window');
         windows.forEach(win => {
             win.addEventListener('mousedown', () => bringToFront(win));
@@ -831,15 +823,13 @@
         function makeDraggable(element, handle) {
             let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
             
-            // Mouse Events
             handle.onmousedown = dragMouseDown;
-            // Touch Events
             handle.addEventListener('touchstart', dragTouchStart, {passive: false});
 
             function dragMouseDown(e) {
                 if(e.target.closest('.traffic-lights')) return;
                 const appId = element.id.replace('window-', '');
-                if (windowStates[appId] && windowStates[appId].maximized) return; // Prevent dragging while maximized
+                if (windowStates[appId] && windowStates[appId].maximized) return;
                 e.preventDefault();
                 pos3 = e.clientX;
                 pos4 = e.clientY;
@@ -895,7 +885,6 @@
             }
         }
 
-        // --- Terminal Logic ---
         document.getElementById('term-login-time').innerText = new Date().toString().substring(0, 24);
         
         function handleTerminalCommand(e) {
@@ -953,7 +942,6 @@
             }
         }
 
-        // --- Calculator Logic ---
         let calcValue = '0';
         let calcFirstOperand = null;
         let calcOperator = null;
@@ -1024,7 +1012,6 @@
             '-': (first, second) => first - second,
         };
 
-        // --- Clock Update Logic ---
         function updateClock() {
             const now = new Date();
             const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
@@ -1033,7 +1020,6 @@
         }
         setInterval(updateClock, 1000);
         updateClock();
-
     </script>
 </body>
 </html>
