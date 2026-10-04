@@ -4,617 +4,834 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wave OS</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
     <style>
-        body {
+        * {
+            box-sizing: border-box;
             margin: 0;
-            overflow: hidden;
-            font-family: 'Inter', sans-serif;
-            background: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2560&auto=format&fit=crop') no-repeat center center fixed;
-            background-size: cover;
+            padding: 0;
             user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
 
-        /* Power & Boot Screens */
-        #power-screen {
-            position: fixed;
-            inset: 0;
-            background-color: #000;
-            z-index: 20000;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease;
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
         }
 
-        .power-btn {
-            background: transparent;
-            color: white;
-            border: 2px solid white;
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            font-size: 32px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .power-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.05);
-        }
-
+        /* BOOT SCREEN */
         #boot-screen {
             position: fixed;
-            inset: 0;
-            background-color: #000;
-            z-index: 10000;
-            display: none;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #0b0f19;
+            display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            transition: opacity 1s ease, visibility 1s ease;
-            opacity: 1;
+            justify-content: center;
+            z-index: 99999;
+            color: white;
+            transition: opacity 0.8s ease;
         }
 
         .boot-logo {
-            color: white;
-            font-size: 80px;
-            margin-bottom: 40px;
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: pulseLogo 2s infinite ease-in-out;
         }
 
-        .loading-bar-container {
+        .boot-title {
+            font-size: 28px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+        }
+
+        .boot-progress-bar {
             width: 200px;
             height: 4px;
-            background-color: #333;
-            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
             overflow: hidden;
         }
 
-        .loading-bar {
+        .boot-progress-fill {
             width: 0%;
             height: 100%;
-            background-color: white;
-            border-radius: 4px;
+            background: #ffffff;
+            transition: width 0.1s linear;
         }
 
-        .run-boot-anim {
-            animation: loadOS 5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
         }
 
-        @keyframes loadOS {
-            0% { width: 0%; }
-            20% { width: 15%; }
-            50% { width: 60%; }
-            80% { width: 85%; }
-            100% { width: 100%; }
-        }
-
-        /* Glassmorphism utilities */
-        .glass {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-
-        .glass-panel {
-            background: rgba(250, 250, 250, 0.85);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
-        }
-
-        /* Top Menu Bar */
-        #menubar {
-            height: 28px;
-            background: rgba(255, 255, 255, 0.4);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
+        /* POWER ON OVERLAY */
+        #power-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, #1a233a 0%, #05080f 100%);
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            padding: 0 16px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #1d1d1f;
-            z-index: 9999;
-            position: relative;
-        }
-
-        .menu-item {
-            padding: 2px 10px;
-            border-radius: 4px;
-            cursor: default;
-            transition: background 0.1s;
-        }
-
-        .menu-item:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        /* macOS Dock */
-        #dock-container {
-            position: absolute;
-            bottom: 10px;
-            width: 100%;
-            display: flex;
             justify-content: center;
-            z-index: 9998;
-            pointer-events: none;
+            z-index: 100000;
+            color: white;
+            cursor: pointer;
         }
 
-        #dock {
+        .power-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 16px 36px;
+            border-radius: 30px;
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 8px 12px;
-            border-radius: 24px;
-            transition: width 0.3s ease;
-            pointer-events: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .dock-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.9);
+        .power-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.03);
+        }
+
+        /* DESKTOP */
+        #desktop {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2560&q=80') no-repeat center center/cover;
+            display: none;
+        }
+
+        /* TOP MENU BAR */
+        #menu-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 28px;
+            background: rgba(20, 20, 20, 0.35);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             display: flex;
-            justify-content: center;
             align-items: center;
-            font-size: 26px;
+            justify-content: space-between;
+            padding: 0 16px;
+            color: #fff;
+            font-size: 13px;
+            z-index: 9000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-left, .menu-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .menu-item {
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-            transform-origin: bottom;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .apple-menu-container {
             position: relative;
         }
 
-        .dock-icon:hover {
-            transform: scale(1.4) translateY(-10px);
-            margin: 0 10px;
-            z-index: 10;
-        }
-
-        .dock-icon.active::after {
-            content: '';
+        .apple-dropdown {
             position: absolute;
-            bottom: -6px;
-            width: 4px;
-            height: 4px;
-            background: #1d1d1f;
-            border-radius: 50%;
-        }
-
-        .hidden-app {
-            display: none !important;
-        }
-
-        /* Window System */
-        .os-window {
-            position: absolute;
-            top: 100px;
-            left: 150px;
-            border-radius: 12px;
+            top: 26px;
+            left: 0;
+            width: 180px;
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            padding: 6px;
             display: none;
+            z-index: 9500;
+        }
+
+        .apple-dropdown.active {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 13px;
+            transition: background 0.1s;
+        }
+
+        .dropdown-item:hover {
+            background: #0061ff;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 4px 0;
+        }
+
+        /* WINDOWS */
+        .window {
+            position: absolute;
+            top: 80px;
+            left: 100px;
+            width: 720px;
+            height: 480px;
+            background: rgba(28, 28, 30, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: box-shadow 0.2s;
         }
 
-        .os-window.open {
-            display: flex;
+        .window.maximized {
+            top: 28px !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 28px) !important;
+            border-radius: 0 !important;
+            border: none !important;
         }
 
         .window-header {
-            height: 40px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.03);
             display: flex;
             align-items: center;
-            padding: 0 16px;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-            cursor: pointer;
-            position: relative;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px);
+            padding: 0 14px;
+            cursor: grab;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             flex-shrink: 0;
-            user-select: none;
+        }
+
+        .window-header:active {
+            cursor: grabbing;
         }
 
         .traffic-lights {
             display: flex;
             gap: 8px;
-            z-index: 2;
+            align-items: center;
         }
 
-        .traffic-light {
+        .circle {
             width: 12px;
             height: 12px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
-            justify-content: center;
             align-items: center;
-        }
-        
-        .traffic-light i {
+            justify-content: center;
             font-size: 8px;
-            opacity: 0;
-            transition: opacity 0.1s;
+            color: rgba(0,0,0,0.6);
+            font-weight: bold;
         }
-        
-        .traffic-lights:hover .traffic-light i { opacity: 0.6; }
 
-        .close { background: #ff5f56; border: 1px solid #e0443e; color: #4d0000; }
-        .minimize { background: #ffbd2e; border: 1px solid #dea123; color: #995700; }
-        .maximize { background: #27c93f; border: 1px solid #1aab29; color: #006500; }
+        .close-btn { background: #ff5f56; border: 1px solid #e0443e; }
+        .min-btn { background: #ffbd2e; border: 1px solid #dea123; }
+        .max-btn { background: #27c93f; border: 1px solid #1aab29; }
+
+        .circle span { display: none; }
+        .circle:hover span { display: inline; }
 
         .window-title {
-            position: absolute;
-            width: 100%;
+            flex-grow: 1;
             text-align: center;
-            left: 0;
+            color: rgba(255, 255, 255, 0.85);
             font-size: 13px;
-            font-weight: 600;
-            color: #4a4a4a;
+            font-weight: 500;
             pointer-events: none;
+            margin-right: 52px;
         }
 
         .window-body {
-            flex: 1;
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            background: rgba(250, 250, 250, 0.95);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            position: relative;
         }
 
-        /* Specific App Default Sizing */
-        #window-calculator { width: 240px; height: 340px; }
-        #window-browser { width: 900px; height: 600px; max-width: 95vw; max-height: 85vh; }
-        #window-minecraft { width: 900px; height: 600px; max-width: 95vw; max-height: 85vh; }
-        #window-appstore { width: 780px; height: 520px; max-width: 95vw; max-height: 85vh; }
-        #window-terminal { width: 640px; height: 420px; max-width: 95vw; max-height: 85vh; }
-
-        /* Calculator Styles */
-        .calc-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1px;
-            background: #444;
-            flex: 1;
+        /* DOCK */
+        #dock-container {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 8000;
         }
-        .calc-btn {
-            background: #e0e0e0;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
+
+        .dock {
             display: flex;
+            gap: 12px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 22px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            align-items: center;
+        }
+
+        .dock-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 14px;
+            background: #fff;
+            display: flex;
+            align-items: center;
             justify-content: center;
-            align-items: center;
-            transition: background 0.1s;
-        }
-        .calc-btn:active { background: #ccc; }
-        .calc-btn.op { background: #ff9f0a; color: white; }
-        .calc-btn.op:active { background: #c97c07; }
-        .calc-btn.top-op { background: #d4d4d2; }
-        .calc-btn.top-op:active { background: #b8b8b8; }
-        .calc-btn.zero { grid-column: span 2; padding-left: 20px; justify-content: flex-start; }
-        
-        #calc-display {
-            background: #333333;
-            color: white;
-            font-size: 40px;
-            text-align: right;
-            padding: 10px 15px;
-            font-weight: 300;
-            height: 70px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
-            flex-shrink: 0;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), width 0.2s, height 0.2s;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            font-size: 26px;
         }
 
-        /* App Store Styles */
-        .app-store-sidebar { width: 200px; border-right: 1px solid rgba(0,0,0,0.1); padding: 20px 10px; flex-shrink: 0; }
-        .app-store-main { flex: 1; padding: 30px; overflow-y: auto; }
-        .app-card {
+        .dock-icon:hover {
+            transform: translateY(-10px) scale(1.15);
+        }
+
+        .dock-icon .tooltip {
+            position: absolute;
+            top: -38px;
+            background: rgba(30, 30, 30, 0.85);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .dock-icon:hover .tooltip {
+            opacity: 1;
+        }
+
+        .running-indicator {
+            position: absolute;
+            bottom: -6px;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        /* APP STORE APP */
+        .appstore-container {
             display: flex;
-            align-items: center;
-            padding: 16px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            width: 100%;
+            height: 100%;
+            background: #f6f6f6;
+            color: #1d1d1f;
+        }
+
+        .appstore-sidebar {
+            width: 200px;
+            background: rgba(230, 230, 235, 0.6);
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .appstore-sidebar h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #86868b;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-btn {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s;
+            color: #1d1d1f;
+        }
+
+        .sidebar-btn:hover, .sidebar-btn.active {
+            background: rgba(0, 113, 227, 0.12);
+            color: #0066cc;
+        }
+
+        .appstore-content {
+            flex-grow: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .appstore-content h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .app-grid {
+            display: flex;
+            flex-direction: column;
             gap: 16px;
         }
-        .app-card-icon {
-            width: 64px; height: 64px; border-radius: 14px;
-            display: flex; justify-content: center; align-items: center; font-size: 32px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        .app-card-info { flex: 1; }
-        .app-card-btn {
-            background: #f0f0f0; color: #007aff; font-weight: 600; font-size: 13px;
-            padding: 6px 16px; border-radius: 16px; cursor: pointer; transition: all 0.2s; border: none;
-        }
-        .app-card-btn:hover { background: #e0e0e0; }
-        .app-card-btn.installed { background: transparent; border: 1px solid #ccc; color: #888; }
 
-        /* Install Progress Bar */
-        .install-progress-wrapper {
-            width: 60px;
-            height: 28px;
-            background: #e0e0e0;
-            border-radius: 14px;
+        .app-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .app-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .app-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .app-details h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .app-details p {
+            font-size: 13px;
+            color: #86868b;
+        }
+
+        .install-btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            min-width: 90px;
+        }
+
+        .store-action-btn {
+            background: #0071e3;
+            color: white;
+            border: none;
+            padding: 6px 18px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .store-action-btn:hover {
+            background: #0077ed;
+        }
+
+        .store-action-btn.installed {
+            background: #e8e8ed;
+            color: #1d1d1f;
+        }
+
+        .install-progress-bar {
+            width: 90px;
+            height: 6px;
+            background: #e8e8ed;
+            border-radius: 3px;
             overflow: hidden;
             display: none;
         }
+
         .install-progress-fill {
-            height: 100%;
-            background: #007aff;
             width: 0%;
-            transition: width 5s linear;
+            height: 100%;
+            background: #0071e3;
+            transition: width 0.05s linear;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+        /* CALCULATOR APP */
+        .calc-container {
+            width: 100%;
+            height: 100%;
+            background: #1c1c1e;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            justify-content: flex-end;
+        }
 
-        @media (max-width: 768px) {
-            .app-store-sidebar { display: none; }
-            .os-window { width: 95vw !important; left: 2.5vw !important; }
+        .calc-display {
+            color: white;
+            font-size: 48px;
+            font-weight: 300;
+            text-align: right;
+            padding: 10px 16px;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            background: #3a3a3c;
+            border: none;
+            border-radius: 50%;
+            width: 100%;
+            aspect-ratio: 1;
+            color: white;
+            font-size: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: filter 0.1s;
+        }
+
+        .calc-btn:hover { filter: brightness(1.2); }
+        .calc-btn.function { background: #a5a5a3; color: black; }
+        .calc-btn.operator { background: #ff9f0a; }
+        .calc-btn.zero { grid-column: span 2; border-radius: 30px; aspect-ratio: auto; justify-content: flex-start; padding-left: 28px; }
+
+        /* BROWSER & MINECRAFT APPS */
+        .browser-container, .minecraft-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+        }
+
+        .browser-toolbar {
+            height: 44px;
+            background: #f1f1f3;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 10px;
+            border-bottom: 1px solid #d1d1d6;
+        }
+
+        .browser-url {
+            flex-grow: 1;
+            background: #ffffff;
+            border: 1px solid #d1d1d6;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #3a3a3c;
+        }
+
+        .browser-frame, .minecraft-frame {
+            flex-grow: 1;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* TERMINAL APP */
+        .terminal-container {
+            width: 100%;
+            height: 100%;
+            background: rgba(30, 30, 30, 0.95);
+            color: #33ff33;
+            font-family: "SF Mono", Monaco, Menlo, Consolas, monospace;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .terminal-output {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            white-space: pre-wrap;
+        }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-prompt {
+            color: #61afef;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex-grow: 1;
         }
     </style>
 </head>
 <body>
 
-    <div id="power-screen">
-        <button class="power-btn" onclick="startBootSequence()" title="Power On">
-            <i class="fa-solid fa-power-off"></i>
-        </button>
-        <div class="text-white/50 mt-6 text-sm font-light">Press to Power On Wave OS</div>
-    </div>
-
-    <div id="boot-screen">
-        <i class="fa-solid fa-water boot-logo"></i>
-        <div class="loading-bar-container">
-            <div id="loading-progress" class="loading-bar"></div>
+    <!-- POWER ON OVERLAY FOR AUDIO -->
+    <div id="power-overlay" onclick="startSystem()">
+        <div class="power-btn">
+            <span>⚡ Click to Power On Wave OS</span>
         </div>
     </div>
 
-    <nav id="menubar">
-        <div class="flex items-center gap-1 overflow-x-auto whitespace-nowrap hide-scrollbar">
-            <div class="menu-item font-bold text-lg cursor-pointer"><i class="fa-solid fa-water text-blue-600"></i></div>
-            <div class="menu-item font-bold">Wave OS</div>
-            <div class="menu-item hidden sm:block">File</div>
-            <div class="menu-item hidden sm:block">Edit</div>
-            <div class="menu-item hidden sm:block">View</div>
-            <div class="menu-item hidden sm:block">Go</div>
-            <div class="menu-item hidden md:block">Window</div>
-            <div class="menu-item hidden md:block">Help</div>
+    <!-- BOOT SCREEN -->
+    <div id="boot-screen" style="display: none;">
+        <div class="boot-logo">🌊</div>
+        <div class="boot-title">Wave OS</div>
+        <div class="boot-progress-bar">
+            <div class="boot-progress-fill" id="boot-fill"></div>
         </div>
-        <div class="flex items-center gap-4 shrink-0">
-            <div class="flex gap-4 text-gray-700 items-center">
-                <i class="fa-solid fa-expand cursor-pointer hover:text-black transition" onclick="toggleFullscreen()" title="Toggle Fullscreen"></i>
-                <i class="fa-solid fa-wifi cursor-pointer"></i>
-                <i class="fa-solid fa-battery-three-quarters cursor-pointer"></i>
-                <i class="fa-solid fa-magnifying-glass cursor-pointer"></i>
-            </div>
-            <div id="clock" class="menu-item font-medium">--:--</div>
-        </div>
-    </nav>
-
-    <div id="desktop-area" class="relative w-full h-[calc(100vh-28px)]">
-        
-        <!-- App Store Window -->
-        <div id="window-appstore" class="os-window glass-panel">
-            <div class="window-header">
-                <div class="traffic-lights">
-                    <div class="traffic-light close" onclick="closeWindow('appstore')"><i class="fa-solid fa-xmark"></i></div>
-                    <div class="traffic-light minimize" onclick="closeWindow('appstore')"><i class="fa-solid fa-minus"></i></div>
-                    <div class="traffic-light maximize" onclick="toggleMaximize('appstore')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
-                </div>
-                <div class="window-title">App Store</div>
-            </div>
-            <div class="window-body flex flex-row">
-                <div class="app-store-sidebar bg-white/40">
-                    <div class="text-xl font-bold mb-6 px-2">Discover</div>
-                    <div class="sidebar-item bg-blue-100 text-blue-600 font-medium p-2 rounded-lg mb-2"><i class="fa-solid fa-rocket mr-2"></i> Featured</div>
-                    <div class="sidebar-item hover:bg-black/5 p-2 rounded-lg mb-2 cursor-pointer"><i class="fa-solid fa-list mr-2"></i> Categories</div>
-                    <div class="sidebar-item hover:bg-black/5 p-2 rounded-lg cursor-pointer"><i class="fa-solid fa-rotate mr-2"></i> Updates</div>
-                </div>
-                <div class="app-store-main bg-white/60">
-                    <h1 class="text-3xl font-bold border-b border-black/10 pb-4 mb-4">Recommended for You</h1>
-                    
-                    <!-- Calculator App Card -->
-                    <div class="app-card">
-                        <div class="app-card-icon bg-orange-400 text-white"><i class="fa-solid fa-calculator"></i></div>
-                        <div class="app-card-info">
-                            <div class="text-lg font-bold text-gray-800">Calculator</div>
-                            <div class="text-sm text-gray-500">Perform basic mathematics.</div>
-                        </div>
-                        <button id="install-btn-calculator" class="app-card-btn" onclick="startInstall('calculator')">GET</button>
-                        <div id="install-prog-calculator" class="install-progress-wrapper">
-                            <div id="install-fill-calculator" class="install-progress-fill"></div>
-                        </div>
-                    </div>
-
-                    <!-- Browser App Card -->
-                    <div class="app-card">
-                        <div class="app-card-icon bg-blue-500 text-white"><i class="fa-regular fa-compass"></i></div>
-                        <div class="app-card-info">
-                            <div class="text-lg font-bold text-gray-800">Browser</div>
-                            <div class="text-sm text-gray-500">Surf the web securely.</div>
-                        </div>
-                        <button id="install-btn-browser" class="app-card-btn" onclick="startInstall('browser')">GET</button>
-                        <div id="install-prog-browser" class="install-progress-wrapper">
-                            <div id="install-fill-browser" class="install-progress-fill"></div>
-                        </div>
-                    </div>
-
-                    <!-- Minecraft App Card -->
-                    <div class="app-card">
-                        <div class="app-card-icon bg-emerald-600 text-white"><i class="fa-solid fa-cube"></i></div>
-                        <div class="app-card-info">
-                            <div class="text-lg font-bold text-gray-800">Minecraft</div>
-                            <div class="text-sm text-gray-500">Classic browser sandbox game.</div>
-                        </div>
-                        <button id="install-btn-minecraft" class="app-card-btn" onclick="startInstall('minecraft')">GET</button>
-                        <div id="install-prog-minecraft" class="install-progress-wrapper">
-                            <div id="install-fill-minecraft" class="install-progress-fill"></div>
-                        </div>
-                    </div>
-
-                    <!-- Terminal App Card -->
-                    <div class="app-card">
-                        <div class="app-card-icon bg-gray-900 text-white"><i class="fa-solid fa-terminal"></i></div>
-                        <div class="app-card-info">
-                            <div class="text-lg font-bold text-gray-800">Terminal</div>
-                            <div class="text-sm text-gray-500">Command line interface.</div>
-                        </div>
-                        <button id="install-btn-terminal" class="app-card-btn installed" onclick="toggleWindow('terminal')">OPEN</button>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <!-- Calculator Window -->
-        <div id="window-calculator" class="os-window glass-panel" style="background: #333;">
-            <div class="window-header" style="background: #333; border-bottom: none;">
-                <div class="traffic-lights">
-                    <div class="traffic-light close" onclick="closeWindow('calculator')"><i class="fa-solid fa-xmark"></i></div>
-                    <div class="traffic-light minimize" onclick="closeWindow('calculator')"><i class="fa-solid fa-minus"></i></div>
-                    <div class="traffic-light maximize" onclick="toggleMaximize('calculator')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
-                </div>
-            </div>
-            <div class="window-body">
-                <div id="calc-display">0</div>
-                <div class="calc-grid">
-                    <button class="calc-btn top-op" onclick="calcAction('clear')">AC</button>
-                    <button class="calc-btn top-op" onclick="calcAction('negate')">+/-</button>
-                    <button class="calc-btn top-op" onclick="calcAction('percent')">%</button>
-                    <button class="calc-btn op" onclick="calcAction('/')">÷</button>
-                    
-                    <button class="calc-btn" onclick="calcAppend('7')">7</button>
-                    <button class="calc-btn" onclick="calcAppend('8')">8</button>
-                    <button class="calc-btn" onclick="calcAppend('9')">9</button>
-                    <button class="calc-btn op" onclick="calcAction('*')">×</button>
-                    
-                    <button class="calc-btn" onclick="calcAppend('4')">4</button>
-                    <button class="calc-btn" onclick="calcAppend('5')">5</button>
-                    <button class="calc-btn" onclick="calcAppend('6')">6</button>
-                    <button class="calc-btn op" onclick="calcAction('-')">-</button>
-                    
-                    <button class="calc-btn" onclick="calcAppend('1')">1</button>
-                    <button class="calc-btn" onclick="calcAppend('2')">2</button>
-                    <button class="calc-btn" onclick="calcAppend('3')">3</button>
-                    <button class="calc-btn op" onclick="calcAction('+')">+</button>
-                    
-                    <button class="calc-btn zero" onclick="calcAppend('0')">0</button>
-                    <button class="calc-btn" onclick="calcAppend('.')">.</button>
-                    <button class="calc-btn op" onclick="calcAction('=')">=</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Browser Window -->
-        <div id="window-browser" class="os-window glass-panel">
-            <div class="window-header">
-                <div class="traffic-lights">
-                    <div class="traffic-light close" onclick="closeWindow('browser')"><i class="fa-solid fa-xmark"></i></div>
-                    <div class="traffic-light minimize" onclick="closeWindow('browser')"><i class="fa-solid fa-minus"></i></div>
-                    <div class="traffic-light maximize" onclick="toggleMaximize('browser')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
-                </div>
-                <div class="flex-1 flex justify-center px-4">
-                    <div class="w-2/3 bg-black/10 rounded-md text-center py-1 text-xs text-gray-600 font-medium overflow-hidden text-ellipsis whitespace-nowrap">
-                        <i class="fa-solid fa-lock text-gray-400 mr-1"></i> https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/
-                    </div>
-                </div>
-            </div>
-            <div class="window-body" style="background: white;">
-                <iframe src="https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/" style="width: 100%; height: 100%; border: none; flex: 1;"></iframe>
-            </div>
-        </div>
-
-        <!-- Minecraft Window -->
-        <div id="window-minecraft" class="os-window glass-panel">
-            <div class="window-header">
-                <div class="traffic-lights">
-                    <div class="traffic-light close" onclick="closeWindow('minecraft')"><i class="fa-solid fa-xmark"></i></div>
-                    <div class="traffic-light minimize" onclick="closeWindow('minecraft')"><i class="fa-solid fa-minus"></i></div>
-                    <div class="traffic-light maximize" onclick="toggleMaximize('minecraft')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
-                </div>
-                <div class="flex-1 flex justify-center px-4">
-                    <div class="w-2/3 bg-black/10 rounded-md text-center py-1 text-xs text-gray-600 font-medium overflow-hidden text-ellipsis whitespace-nowrap">
-                        <i class="fa-solid fa-lock text-gray-400 mr-1"></i> https://ajgplayz-studio.github.io/Arcade-hub/minecraft.html
-                    </div>
-                </div>
-            </div>
-            <div class="window-body" style="background: black;">
-                <iframe src="https://ajgplayz-studio.github.io/Arcade-hub/minecraft.html" style="width: 100%; height: 100%; border: none; flex: 1;"></iframe>
-            </div>
-        </div>
-
-        <!-- Terminal Window -->
-        <div id="window-terminal" class="os-window glass-panel" style="background: rgba(30,30,30,0.95); backdrop-filter: blur(20px);">
-            <div class="window-header" style="background: rgba(50,50,50,0.5); border-bottom: 1px solid rgba(0,0,0,0.5);">
-                <div class="traffic-lights">
-                    <div class="traffic-light close" onclick="closeWindow('terminal')"><i class="fa-solid fa-xmark"></i></div>
-                    <div class="traffic-light minimize" onclick="closeWindow('terminal')"><i class="fa-solid fa-minus"></i></div>
-                    <div class="traffic-light maximize" onclick="toggleMaximize('terminal')"><i class="fa-solid fa-up-right-and-down-left-from-center"></i></div>
-                </div>
-                <div class="window-title" style="color: #ccc;">guest — -bash — 80x24</div>
-            </div>
-            <div class="window-body flex flex-col font-mono text-[13px] text-gray-200 p-3 overflow-y-auto cursor-text" style="background: transparent;" onclick="document.getElementById('term-input').focus()">
-                <div class="mb-2 text-gray-400">
-                    Last login: <span id="term-login-time"></span> on ttys000<br>
-                    Welcome to Wave OS terminal. Type 'help' to see available commands.
-                </div>
-                <div id="term-output"></div>
-                <div class="flex items-center mt-1">
-                    <span class="mr-2 font-bold">guest@waveos ~ %</span>
-                    <input type="text" id="term-input" class="flex-1 bg-transparent border-none outline-none text-gray-200 font-mono" autocomplete="off" spellcheck="false" onkeydown="handleTerminalCommand(event)">
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <div id="dock-container">
-        <nav id="dock" class="glass">
-            <div class="dock-icon text-blue-500 bg-white" onclick="toggleWindow('appstore')" id="dock-appstore" title="App Store">
-                <i class="fa-brands fa-app-store-ios"></i>
+    <!-- MAIN DESKTOP -->
+    <div id="desktop">
+        <!-- TOP MENU BAR -->
+        <div id="menu-bar">
+            <div class="menu-left">
+                <div class="apple-menu-container">
+                    <div class="menu-item" id="apple-menu-btn" onclick="toggleAppleMenu(event)">🌊</div>
+                    <div class="apple-dropdown" id="apple-dropdown">
+                        <div class="dropdown-item" onclick="openAbout()">About Wave OS</div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" onclick="systemShutdown()">Shutdown</div>
+                    </div>
+                </div>
+                <div class="menu-item" style="font-weight: 600;" id="active-app-name">Finder</div>
+                <div class="menu-item">File</div>
+                <div class="menu-item">Edit</div>
+                <div class="menu-item">View</div>
+                <div class="menu-item">Go</div>
+                <div class="menu-item">Window</div>
+                <div class="menu-item">Help</div>
             </div>
-            
-            <div class="dock-icon text-white bg-orange-400 hidden-app" onclick="toggleWindow('calculator')" id="dock-calculator" title="Calculator">
-                <i class="fa-solid fa-calculator"></i>
+            <div class="menu-right">
+                <div class="menu-item" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶ Fullscreen</div>
+                <div class="menu-item">Wi-Fi</div>
+                <div class="menu-item">🔋 100%</div>
+                <div class="menu-item" id="clock-display">Sat Oct 3 6:10 PM</div>
             </div>
-            <div class="dock-icon text-white bg-blue-500 hidden-app" onclick="toggleWindow('browser')" id="dock-browser" title="Browser">
-                <i class="fa-regular fa-compass"></i>
+        </div>
+
+        <!-- WINDOW CONTAINER -->
+        <div id="window-container"></div>
+
+        <!-- DOCK -->
+        <div id="dock-container">
+            <div class="dock" id="dock">
+                <!-- App Store -->
+                <div class="dock-icon" onclick="openApp('appstore')" style="background: linear-gradient(135deg, #0071e3, #4589ff);">
+                    🛍️
+                    <div class="tooltip">App Store</div>
+                </div>
+                <!-- Calculator (Installed) -->
+                <div class="dock-icon" id="dock-calculator" onclick="openApp('calculator')" style="background: linear-gradient(135deg, #ff9f0a, #ffb340);">
+                    🧮
+                    <div class="tooltip">Calculator</div>
+                    <div class="running-indicator" id="ind-calculator" style="display:none;"></div>
+                </div>
+                <!-- Browser (Installed) -->
+                <div class="dock-icon" id="dock-browser" onclick="openApp('browser')" style="background: linear-gradient(135deg, #0061ff, #60efff);">
+                    🧭
+                    <div class="tooltip">Browser</div>
+                    <div class="running-indicator" id="ind-browser" style="display:none;"></div>
+                </div>
+                <!-- Minecraft (Installed) -->
+                <div class="dock-icon" id="dock-minecraft" onclick="openApp('minecraft')" style="background: linear-gradient(135deg, #2d8a4e, #57b878);">
+                    🟩
+                    <div class="tooltip">Minecraft</div>
+                    <div class="running-indicator" id="ind-minecraft" style="display:none;"></div>
+                </div>
+                <!-- Terminal (Preinstalled) -->
+                <div class="dock-icon" id="dock-terminal" onclick="openApp('terminal')" style="background: linear-gradient(135deg, #2c2c2e, #1c1c1e); color: #33ff33;">
+                    💻
+                    <div class="tooltip">Terminal</div>
+                    <div class="running-indicator" id="ind-terminal" style="display:none;"></div>
+                </div>
             </div>
-            <div class="dock-icon text-white bg-emerald-600 hidden-app" onclick="toggleWindow('minecraft')" id="dock-minecraft" title="Minecraft">
-                <i class="fa-solid fa-cube"></i>
-            </div>
-            
-            <div class="dock-icon text-white bg-gray-900" onclick="toggleWindow('terminal')" id="dock-terminal" title="Terminal">
-                <i class="fa-solid fa-terminal"></i>
-            </div>
-        </nav>
+        </div>
     </div>
 
     <script>
+        // APP REGISTRY & INSTALLATION STATUS
+        const apps = {
+            appstore: { title: "App Store", icon: "🛍️", installed: true },
+            calculator: { title: "Calculator", icon: "🧮", installed: true },
+            browser: { title: "Browser", icon: "🧭", installed: true },
+            minecraft: { title: "Minecraft", icon: "🟩", installed: true },
+            terminal: { title: "Terminal", icon: "💻", installed: true }
+        };
+
+        let activeWindows = {};
+        let zIndexCounter = 1000;
+        let focusedWindow = null;
+
+        function startSystem() {
+            document.getElementById('power-overlay').style.display = 'none';
+            document.getElementById('boot-screen').style.display = 'flex';
+
+            playLoudWaveSound();
+
+            let progress = 0;
+            const fill = document.getElementById('boot-fill');
+            const bootDuration = 5000; // 5 seconds boot
+            const intervalTime = 50;
+            const increment = 100 / (bootDuration / intervalTime);
+
+            const timer = setInterval(() => {
+                progress += increment;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(timer);
+                    document.getElementById('boot-screen').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('boot-screen').style.display = 'none';
+                        document.getElementById('desktop').style.display = 'block';
+                    }, 800);
+                }
+                fill.style.width = progress + '%';
+            }, intervalTime);
+        }
+
+        function playLoudWaveSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                // White noise buffer for crashing wave sound
+                const bufferSize = audioCtx.sampleRate * 1.5;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                // Bandpass filter to sculpt wave frequency
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 1.2);
+                filter.Q.value = 1.5;
+
+                // Loud gain envelope
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.0, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.85, audioCtx.currentTime + 0.3); // Quick loud attack
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.4);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                noise.start();
+                noise.stop(audioCtx.currentTime + 1.5);
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        // CLOCK
+        setInterval(() => {
+            const now = new Date();
+            const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+            document.getElementById('clock-display').innerText = now.toLocaleDateString('en-US', options);
+        }, 1000);
+
+        // APPLE MENU & SYSTEM OPTIONS
+        function toggleAppleMenu(e) {
+            e.stopPropagation();
+            const dropdown = document.getElementById('apple-dropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        window.addEventListener('click', () => {
+            document.getElementById('apple-dropdown').classList.remove('active');
+        });
+
+        function openAbout() {
+            alert("Wave OS v2.4\nMac-style web operating system with custom audio, app store, and immersive apps.");
+        }
+
+        function systemShutdown() {
+            document.getElementById('desktop').style.display = 'none';
+            document.getElementById('power-overlay').style.display = 'flex';
+            // Close all windows
+            Object.keys(activeWindows).forEach(appId => closeApp(appId));
+        }
+
+        // FULLSCREEN
         function toggleFullscreen() {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => {
-                    console.error("Error attempting to enable fullscreen:", err.message);
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
                 });
             } else {
                 if (document.exitFullscreen) {
@@ -623,403 +840,1392 @@
             }
         }
 
-        function startBootSequence() {
-            const powerScreen = document.getElementById('power-screen');
-            powerScreen.style.opacity = '0';
-            setTimeout(() => {
-                powerScreen.style.display = 'none';
-            }, 500);
-
-            const bootScreen = document.getElementById('boot-screen');
-            bootScreen.style.display = 'flex';
-            document.getElementById('loading-progress').classList.add('run-boot-anim');
-
-            setTimeout(() => {
-                try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (AudioContext) {
-                        const audioCtx = new AudioContext();
-                        const bufferSize = audioCtx.sampleRate * 1.5;
-                        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-                        const data = buffer.getChannelData(0);
-                        for (let i = 0; i < bufferSize; i++) {
-                            data[i] = Math.random() * 2 - 1;
-                        }
-                        
-                        const noiseSource = audioCtx.createBufferSource();
-                        noiseSource.buffer = buffer;
-                        
-                        const filter = audioCtx.createBiquadFilter();
-                        filter.type = 'lowpass';
-                        filter.frequency.setValueAtTime(1500, audioCtx.currentTime);
-                        filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 1.5);
-                        
-                        const gainNode = audioCtx.createGain();
-                        gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-                        gainNode.gain.linearRampToValueAtTime(2.0, audioCtx.currentTime + 0.05);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
-                        
-                        noiseSource.connect(filter);
-                        filter.connect(gainNode);
-                        gainNode.connect(audioCtx.destination);
-                        
-                        noiseSource.start();
-                    }
-                } catch(e) {
-                    console.log('Audio synthesis failed:', e);
-                }
-                
-                bootScreen.style.opacity = '0';
-                setTimeout(() => {
-                    bootScreen.style.visibility = 'hidden';
-                    bootScreen.style.display = 'none';
-                }, 1000);
-            }, 5000); 
-        }
-
-        let zIndexCounter = 100;
-        const windowStates = {}; 
-        
-        function startInstall(appId) {
-            const btn = document.getElementById(`install-btn-${appId}`);
-            const progWrapper = document.getElementById(`install-prog-${appId}`);
-            const progFill = document.getElementById(`install-fill-${appId}`);
-            
-            if(!btn || !progWrapper || !progFill) return;
-            
-            btn.style.display = 'none';
-            progWrapper.style.display = 'block';
-            void progFill.offsetWidth;
-            progFill.style.width = '100%';
-            
-            setTimeout(() => {
-                progWrapper.style.display = 'none';
-                btn.style.display = 'block';
-                installApp(appId);
-            }, 5000);
-        }
-
-        function installApp(appId) {
-            const dockIcon = document.getElementById(`dock-${appId}`);
-            if(dockIcon) dockIcon.classList.remove('hidden-app');
-            
-            const btn = document.getElementById(`install-btn-${appId}`);
-            if(btn) {
-                btn.innerText = 'OPEN';
-                btn.classList.add('installed');
-                btn.onclick = () => toggleWindow(appId);
-            }
-
-            if(dockIcon) {
-                dockIcon.style.transform = 'scale(1.3) translateY(-10px)';
-                setTimeout(() => dockIcon.style.transform = '', 300);
-            }
-        }
-
-        function toggleWindow(appId) {
-            const win = document.getElementById(`window-${appId}`);
-            const dockIcon = document.getElementById(`dock-${appId}`);
-            
-            if (win.classList.contains('open')) {
-                if (parseInt(win.style.zIndex) === zIndexCounter) {
-                    closeWindow(appId);
-                } else {
-                    bringToFront(win);
-                }
-            } else {
-                win.classList.add('open');
-                if(dockIcon) dockIcon.classList.add('active');
-                
-                if (!win.style.top || windowStates[appId]?.maximized) {
-                    const desktop = document.getElementById('desktop-area');
-                    const dw = desktop.clientWidth;
-                    const dh = desktop.clientHeight;
-                    const ww = win.clientWidth || 700;
-                    const wh = win.clientHeight || 450;
-                    
-                    win.style.top = `${Math.max(10, (dh - wh) / 2 + (Math.random() * 40 - 20))}px`;
-                    win.style.left = `${Math.max(10, (dw - ww) / 2 + (Math.random() * 40 - 20))}px`;
-                }
-                
-                bringToFront(win);
-
-                if (appId === 'terminal') {
-                    setTimeout(() => document.getElementById('term-input').focus(), 100);
-                }
-            }
-        }
-
-        function closeWindow(appId) {
-            const win = document.getElementById(`window-${appId}`);
-            const dockIcon = document.getElementById(`dock-${appId}`);
-            win.classList.remove('open');
-            if(dockIcon) dockIcon.classList.remove('active');
-        }
-
-        function toggleMaximize(appId) {
-            const win = document.getElementById(`window-${appId}`);
-            if (!win) return;
-
-            bringToFront(win);
-
-            if (!windowStates[appId]) {
-                windowStates[appId] = {
-                    top: win.style.top,
-                    left: win.style.left,
-                    width: win.style.width,
-                    height: win.style.height,
-                    borderRadius: win.style.borderRadius,
-                    maximized: false
-                };
-            }
-
-            const state = windowStates[appId];
-
-            if (!state.maximized) {
-                state.top = win.style.top;
-                state.left = win.style.left;
-                state.width = win.style.width || `${win.clientWidth}px`;
-                state.height = win.style.height || `${win.clientHeight}px`;
-                state.borderRadius = win.style.borderRadius;
-
-                win.style.position = 'fixed';
-                win.style.top = '0px';
-                win.style.left = '0px';
-                win.style.width = '100vw';
-                win.style.height = '100vh';
-                win.style.borderRadius = '0px';
-                win.style.zIndex = '9999';
-                state.maximized = true;
-            } else {
-                win.style.position = 'absolute';
-                win.style.top = state.top;
-                win.style.left = state.left;
-                win.style.width = state.width;
-                win.style.height = state.height;
-                win.style.borderRadius = state.borderRadius || '12px';
-                state.maximized = false;
-                bringToFront(win);
-            }
-        }
-
-        function bringToFront(element) {
-            const appId = element.id.replace('window-', '');
-            if (windowStates[appId] && windowStates[appId].maximized) {
-                element.style.zIndex = '9999';
+        // APP MANAGEMENT
+        function openApp(appId) {
+            if (!apps[appId].installed) {
+                alert("Please install this app from the App Store first.");
+                openApp('appstore');
                 return;
             }
+
+            if (activeWindows[appId]) {
+                focusWindow(appId);
+                return;
+            }
+
+            const winId = 'win-' + appId;
             zIndexCounter++;
-            element.style.zIndex = zIndexCounter;
+
+            const win = document.createElement('div');
+            win.className = 'window';
+            win.id = winId;
+            win.style.zIndex = zIndexCounter;
+            win.style.top = (60 + Math.random() * 40) + 'px';
+            win.style.left = (120 + Math.random() * 60) + 'px';
+
+            win.innerHTML = `
+                <div class="window-header" onmousedown="startDrag(event, '${appId}')">
+                    <div class="traffic-lights">
+                        <div class="circle close-btn" onclick="closeApp('${appId}')" title="Close"><span>×</span></div>
+                        <div class="circle min-btn" onclick="minimizeApp('${appId}')" title="Minimize"><span>−</span></div>
+                        <div class="circle max-btn" onclick="maximizeApp('${appId}')" title="Maximize"><span>+</span></div>
+                    </div>
+                    <div class="window-title">${apps[appId].icon} ${apps[appId].title}</div>
+                </div>
+                <div class="window-body" id="body-${appId}">
+                    ${getAppContent(appId)}
+                </div>
+            `;
+
+            win.onmousedown = () => focusWindow(appId);
+            document.getElementById('window-container').appendChild(win);
+            activeWindows[appId] = win;
+
+            const ind = document.getElementById('ind-' + appId);
+            if (ind) ind.style.display = 'block';
+
+            focusWindow(appId);
+            initAppScript(appId);
         }
 
-        const windows = document.querySelectorAll('.os-window');
-        windows.forEach(win => {
-            win.addEventListener('mousedown', () => bringToFront(win));
-            win.addEventListener('touchstart', () => bringToFront(win), {passive: true});
-            const header = win.querySelector('.window-header');
-            makeDraggable(win, header);
+        function closeApp(appId) {
+            if (activeWindows[appId]) {
+                activeWindows[appId].remove();
+                delete activeWindows[appId];
+                const ind = document.getElementById('ind-' + appId);
+                if (ind) ind.style.display = 'none';
+            }
+        }
+
+        function minimizeApp(appId) {
+            if (activeWindows[appId]) {
+                activeWindows[appId].style.display = 'none';
+            }
+        }
+
+        function maximizeApp(appId) {
+            const win = activeWindows[appId];
+            if (!win) return;
+            win.classList.toggle('maximized');
+        }
+
+        function focusWindow(appId) {
+            const win = activeWindows[appId];
+            if (!win) return;
+            win.style.display = 'flex';
+            zIndexCounter++;
+            win.style.zIndex = zIndexCounter;
+            focusedWindow = appId;
+            document.getElementById('active-app-name').innerText = apps[appId].title;
+        }
+
+        // WINDOW DRAGGING
+        function startDrag(e, appId) {
+            if (e.target.classList.contains('circle')) return;
+            const win = activeWindows[appId];
+            if (win.classList.contains('maximized')) return;
+
+            let startX = e.clientX;
+            let startY = e.clientY;
+            let rect = win.getBoundingClientRect();
+
+            function onMouseMove(moveEvent) {
+                let dx = moveEvent.clientX - startX;
+                let dy = moveEvent.clientY - startY;
+                win.style.top = Math.max(28, rect.top + dy) + 'px';
+                win.style.left = (rect.left + dx) + 'px';
+            }
+
+            function onMouseUp() {
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            }
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        }
+
+        // APP CONTENTS & SCRIPTS
+        function getAppContent(appId) {
+            switch(appId) {
+                case 'appstore':
+                    return `
+                        <div class="appstore-container">
+                            <div class="appstore-sidebar">
+                                <h3>Discover</h3>
+                                <div class="sidebar-btn active">Featured</div>
+                                <div class="sidebar-btn">Categories</div>
+                                <div class="sidebar-btn">Updates</div>
+                            </div>
+                            <div class="appstore-content">
+                                <h2>Discover Great Apps</h2>
+                                <div class="app-grid" id="store-app-list">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                case 'calculator':
+                    return `
+                        <div class="calc-container">
+                            <div class="calc-display" id="calc-display">0</div>
+                            <div class="calc-grid">
+                                <button class="calc-btn function" onclick="calcClear()">AC</button>
+                                <button class="calc-btn function" onclick="calcSign()">±</button>
+                                <button class="calc-btn function" onclick="calcPercent()">%</button>
+                                <button class="calc-btn operator" onclick="calcOp('/')">÷</button>
+                                <button class="calc-btn" onclick="calcNum('7')">7</button>
+                                <button class="calc-btn" onclick="calcNum('8')">8</button>
+                                <button class="calc-btn" onclick="calcNum('9')">9</button>
+                                <button class="calc-btn operator" onclick="calcOp('*')">×</button>
+                                <button class="calc-btn" onclick="calcNum('4')">4</button>
+                                <button class="calc-btn" onclick="calcNum('5')">5</button>
+                                <button class="calc-btn" onclick="calcNum('6')">6</button>
+                                <button class="calc-btn operator" onclick="calcOp('-')">-</button>
+                                <button class="calc-btn" onclick="calcNum('1')">1</button>
+                               ```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave OS</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* BOOT / SHUTDOWN SCREEN */
+        #boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            transition: opacity 0.8s ease;
+        }
+
+        .boot-logo {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        .boot-title {
+            font-size: 28px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 40px;
+        }
+
+        .boot-progress-bar {
+            width: 200px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .boot-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #fff;
+            transition: width 0.1s linear;
+        }
+
+        .power-on-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            border-radius: 20px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: background 0.2s;
+        }
+
+        .power-on-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+        /* DESKTOP BACKGROUND */
+        #desktop {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: url('[https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80](https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80)') no-repeat center center;
+            background-size: cover;
+            display: none;
+        }
+
+        /* TOP MENU BAR */
+        #menu-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 28px;
+            background: rgba(30, 30, 30, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            color: #fff;
+            font-size: 13px;
+            z-index: 10000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-left, .menu-right {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .menu-item {
+            cursor: pointer;
+            font-weight: 400;
+            transition: opacity 0.2s;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            opacity: 0.8;
+        }
+
+        .menu-item.bold {
+            font-weight: 600;
+        }
+
+        /* APPLE / WAVE MENU DROPDOWN */
+        #apple-menu {
+            position: absolute;
+            top: 32px;
+            left: 12px;
+            width: 180px;
+            background: rgba(40, 40, 40, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            padding: 6px;
+            z-index: 10002;
+        }
+
+        .apple-menu-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .apple-menu-item:hover {
+            background: #007aff;
+        }
+
+        .apple-menu-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 4px 0;
+        }
+
+        /* DOCK */
+        #dock-container {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+        }
+
+        #dock {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 20px;
+            padding: 8px 12px;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .dock-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s, width 0.2s, height 0.2s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .dock-icon:hover {
+            transform: translateY(-8px) scale(1.15);
+        }
+
+        .dock-icon svg {
+            width: 30px;
+            height: 30px;
+            fill: #fff;
+        }
+
+        .dock-dot {
+            position: absolute;
+            bottom: -4px;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .dock-icon.active .dock-dot {
+            display: block;
+        }
+
+        /* WINDOW SYSTEM */
+        .window {
+            position: absolute;
+            top: 80px;
+            left: 100px;
+            width: 700px;
+            height: 480px;
+            background: rgba(30, 30, 30, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+            transition: border-radius 0.2s ease, width 0.2s ease, height 0.2s ease, top 0.2s ease, left 0.2s ease;
+        }
+
+        .window.minimized {
+            display: none;
+        }
+
+        .window.maximized {
+            top: 28px !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: calc(100vh - 28px) !important;
+            border-radius: 0 !important;
+            border: none !important;
+        }
+
+        .window-header {
+            height: 38px;
+            background: rgba(45, 45, 45, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            cursor: grab;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .window-header:active {
+            cursor: grabbing;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .traffic-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: rgba(0,0,0,0.6);
+            font-weight: bold;
+        }
+
+        .traffic-close { background: #ff5f56; }
+        .traffic-minimize { background: #ffbd2e; }
+        .traffic-maximize { background: #27c93f; }
+
+        .traffic-btn span {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .traffic-btn:hover span {
+            opacity: 1;
+        }
+
+        .window-title {
+            position: absolute;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        .window-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: rgba(20, 20, 20, 0.6);
+            color: #fff;
+            position: relative;
+        }
+
+        /* APP STORE STYLES */
+        .appstore-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .appstore-sidebar {
+            width: 200px;
+            background: rgba(30, 30, 30, 0.4);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .appstore-sidebar h3 {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+            padding-left: 8px;
+        }
+
+        .sidebar-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            text-align: left;
+        }
+
+        .sidebar-btn.active, .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .appstore-main {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .appstore-main h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .app-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .app-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .app-card-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .app-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .app-card-text h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .app-card-text p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .install-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .install-btn {
+            padding: 6px 16px;
+            background: #007aff;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            min-width: 75px;
+            text-align: center;
+        }
+
+        .install-btn:hover {
+            background: #0062cc;
+        }
+
+        .install-btn.installed {
+            background: rgba(255, 255, 255, 0.15);
+            cursor: default;
+        }
+
+        .progress-bar-container {
+            width: 90px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: #007aff;
+            transition: width 0.1s linear;
+        }
+
+        /* CALCULATOR STYLES */
+        .calc-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 12px;
+            gap: 10px;
+            background: #1e1e1e;
+        }
+
+        .calc-screen {
+            width: 100%;
+            height: 60px;
+            background: #111;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 12px;
+            font-size: 28px;
+            font-weight: 300;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            flex: 1;
+        }
+
+        .calc-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .calc-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .calc-btn.op {
+            background: #ff9f0a;
+        }
+        .calc-btn.op:hover {
+            background: #e08b00;
+        }
+
+        .calc-btn.fn {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .calc-btn.fn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* BROWSER & MINECRAFT APP STYLES */
+        .browser-container, .minecraft-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+        }
+
+        .browser-toolbar {
+            height: 40px;
+            background: rgba(40, 40, 40, 0.8);
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .browser-url {
+            flex: 1;
+            height: 26px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            color: #fff;
+            padding: 0 10px;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .browser-iframe {
+            flex: 1;
+            width: 100%;
+            border: none;
+            background: #fff;
+        }
+
+        /* TERMINAL STYLES */
+        .terminal-container {
+            background: #0c0c0c;
+            color: #00ff66;
+            font-family: "SF Mono", Monaco, Menlo, Consolas, monospace;
+            padding: 12px;
+            height: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .terminal-output {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .terminal-line {
+            line-height: 1.4;
+            word-break: break-all;
+        }
+
+        .terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-prompt {
+            color: #00ff66;
+            font-weight: bold;
+        }
+
+        .terminal-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            outline: none;
+            font-family: inherit;
+            font-size: inherit;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BOOT / SHUTDOWN SCREEN -->
+    <div id="boot-screen">
+        <div class="boot-logo">🌊</div>
+        <div class="boot-title">Wave OS</div>
+        <div class="boot-progress-bar">
+            <div class="boot-progress-fill" id="boot-fill"></div>
+        </div>
+        <button class="power-on-btn" id="power-btn" style="display: none;">Power On</button>
+    </div>
+
+    <!-- DESKTOP -->
+    <div id="desktop">
+        <!-- TOP MENU BAR -->
+        <div id="menu-bar">
+            <div class="menu-left">
+                <div class="menu-item bold" id="wave-menu-btn" onclick="toggleAppleMenu(event)">🌊</div>
+                <div class="menu-item bold" id="active-app-name">Finder</div>
+                <div class="menu-item">File</div>
+                <div class="menu-item">Edit</div>
+                <div class="menu-item">View</div>
+                <div class="menu-item">Go</div>
+                <div class="menu-item">Window</div>
+                <div class="menu-item">Help</div>
+            </div>
+            <div class="menu-right">
+                <div class="menu-item" onclick="toggleFullscreen()">⛶ Fullscreen</div>
+                <div class="menu-item">Wi-Fi</div>
+                <div class="menu-item" id="clock">Sat Oct 3 6:10 PM</div>
+            </div>
+        </div>
+
+        <!-- APPLE / WAVE DROPDOWN MENU -->
+        <div id="apple-menu">
+            <div class="apple-menu-item" onclick="shutdownOS()">Shut Down...</div>
+            <div class="apple-menu-divider"></div>
+            <div class="apple-menu-item" onclick="restartOS()">Restart Wave OS</div>
+        </div>
+
+        <!-- DOCK -->
+        <div id="dock-container">
+            <div id="dock">
+                <div class="dock-icon" title="App Store" onclick="openWindow('appstore')">
+                    <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.8 6.55c.55-.68.92-1.63.82-2.58-.81.03-1.79.54-2.37 1.22-.52.6-.97 1.56-.85 2.5 1.02.08 1.85-.47 2.4-1.14z"/></svg>
+                    <div class="dock-dot" id="dot-appstore"></div>
+                </div>
+                <div class="dock-icon" title="Calculator" onclick="openWindow('calculator')">
+                    <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                    <div class="dock-dot" id="dot-calculator"></div>
+                </div>
+                <!-- Dynamic Installed Apps Container -->
+                <div id="installed-dock-apps" style="display: flex; gap: 12px;"></div>
+                <div class="dock-icon" title="Terminal" onclick="openWindow('terminal')">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H7v-2h8v2zm3-4H6V6h12v8z"/></svg>
+                    <div class="dock-dot" id="dot-terminal"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- APP STORE WINDOW -->
+        <div class="window" id="win-appstore" style="display: none; top: 60px; left: 150px; width: 750px; height: 500px;" onmousedown="focusWindow('appstore')">
+            <div class="window-header" onmousedown="startDrag(event, 'win-appstore')">
+                <div class="traffic-lights">
+                    <button class="traffic-btn traffic-close" onclick="closeWindow('appstore')"><span>×</span></button>
+                    <button class="traffic-btn traffic-minimize" onclick="minimizeWindow('appstore')"><span>-</span></button>
+                    <button class="traffic-btn traffic-maximize" onclick="maximizeWindow('win-appstore')"><span>+</span></button>
+                </div>
+                <div class="window-title">App Store</div>
+            </div>
+            <div class="window-content">
+                <div class="appstore-container">
+                    <div class="appstore-sidebar">
+                        <h3>Discover</h3>
+                        <button class="sidebar-btn active">Featured</button>
+                        <button class="sidebar-btn">Categories</button>
+                        <button class="sidebar-btn">Updates</button>
+                    </div>
+                    <div class="appstore-main">
+                        <h2>Recommended for You</h2>
+                        <div class="app-list">
+                            <!-- Calculator -->
+                            <div class="app-card">
+                                <div class="app-card-info">
+                                    <div class="app-card-icon" style="background: #ff9f0a;">🔢</div>
+                                    <div class="app-card-text">
+                                        <h4>Calculator</h4>
+                                        <p>Perform basic mathematics.</p>
+                                    </div>
+                                </div>
+                                <div class="install-container">
+                                    <button class="install-btn installed" id="btn-install-calculator">INSTALLED</button>
+                                </div>
+                            </div>
+                            <!-- Browser -->
+                            <div class="app-card">
+                                <div class="app-card-info">
+                                    <div class="app-card-icon" style="background: #007aff;">🌐</div>
+                                    <div class="app-card-text">
+                                        <h4>Browser</h4>
+                                        <p>Surf the web securely via proxy.</p>
+                                    </div>
+                                </div>
+                                <div class="install-container">
+                                    <button class="install-btn" id="btn-install-browser" onclick="installApp('browser')">GET</button>
+                                    <div class="progress-bar-container" id="prog-browser"><div class="progress-bar-fill" id="fill-browser"></div></div>
+                                </div>
+                            </div>
+                            <!-- Minecraft -->
+                            <div class="app-card">
+                                <div class="app-card-info">
+                                    <div class="app-card-icon" style="background: #27c93f;">⛏️</div>
+                                    <div class="app-card-text">
+                                        <h4>Minecraft</h4>
+                                        <p>Play browser-based Minecraft sandbox.</p>
+                                    </div>
+                                </div>
+                                <div class="install-container">
+                                    <button class="install-btn" id="btn-install-minecraft" onclick="installApp('minecraft')">GET</button>
+                                    <div class="progress-bar-container" id="prog-minecraft"><div class="progress-bar-fill" id="fill-minecraft"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CALCULATOR WINDOW -->
+        <div class="window" id="win-calculator" style="display: none; top: 100px; left: 300px; width: 280px; height: 380px;" onmousedown="focusWindow('calculator')">
+            <div class="window-header" onmousedown="startDrag(event, 'win-calculator')">
+                <div class="traffic-lights">
+                    <button class="traffic-btn traffic-close" onclick="closeWindow('calculator')"><span>×</span></button>
+                    <button class="traffic-btn traffic-minimize" onclick="minimizeWindow('calculator')"><span>-</span></button>
+                    <button class="traffic-btn traffic-maximize" onclick="maximizeWindow('win-calculator')"><span>+</span></button>
+                </div>
+                <div class="window-title">Calculator</div>
+            </div>
+            <div class="window-content">
+                <div class="calc-container">
+                    <div class="calc-screen" id="calc-display">0</div>
+                    <div class="calc-grid">
+                        <button class="calc-btn fn" onclick="calcClear()">AC</button>
+                        <button class="calc-btn fn" onclick="calcSign()">±</button>
+                        <button class="calc-btn fn" onclick="calcPercent()">%</button>
+                        <button class="calc-btn op" onclick="calcOp('/')">÷</button>
+                        <button class="calc-btn" onclick="calcAppend('7')">7</button>
+                        <button class="calc-btn" onclick="calcAppend('8')">8</button>
+                        <button class="calc-btn" onclick="calcAppend('9')">9</button>
+                        <button class="calc-btn op" onclick="calcOp('*')">×</button>
+                        <button class="calc-btn" onclick="calcAppend('4')">4</button>
+                        <button class="calc-btn" onclick="calcAppend('5')">5</button>
+                        <button class="calc-btn" onclick="calcAppend('6')">6</button>
+                        <button class="calc-btn op" onclick="calcOp('-')">-</button>
+                        <button class="calc-btn" onclick="calcAppend('1')">1</button>
+                        <button class="calc-btn" onclick="calcAppend('2')">2</button>
+                        <button class="calc-btn" onclick="calcAppend('3')">3</button>
+                        <button class="calc-btn op" onclick="calcOp('+')">+</button>
+                        <button class="calc-btn" onclick="calcAppend('0')" style="grid-column: span 2;">0</button>
+                        <button class="calc-btn" onclick="calcAppend('.')">.</button>
+                        <button class="calc-btn op" onclick="calcCompute()">=</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BROWSER WINDOW -->
+        <div class="window" id="win-browser" style="display: none; top: 80px; left: 200px; width: 800px; height: 500px;" onmousedown="focusWindow('browser')">
+            <div class="window-header" onmousedown="startDrag(event, 'win-browser')">
+                <div class="traffic-lights">
+                    <button class="traffic-btn traffic-close" onclick="closeWindow('browser')"><span>×</span></button>
+                    <button class="traffic-btn traffic-minimize" onclick="minimizeWindow('browser')"><span>-</span></button>
+                    <button class="traffic-btn traffic-maximize" onclick="maximizeWindow('win-browser')"><span>+</span></button>
+                </div>
+                <div class="window-title">Browser</div>
+            </div>
+            <div class="window-content">
+                <div class="browser-container">
+                    <div class="browser-toolbar">
+                        <input type="text" class="browser-url" value="[https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/](https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/)" readonly>
+                    </div>
+                    <iframe class="browser-iframe" src="[https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/](https://onex558.github.io/Simple-Scramjet-proxy-static-HTML-/)"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- MINECRAFT WINDOW -->
+        <div class="window" id="win-minecraft" style="display: none; top: 70px; left: 180px; width: 850px; height: 520px;" onmousedown="focusWindow('minecraft')">
+            <div class="window-header" onmousedown="startDrag(event, 'win-minecraft')">
+                <div class="traffic-lights">
+                    <button class="traffic-btn traffic-close" onclick="closeWindow('minecraft')"><span>×</span></button>
+                    <button class="traffic-btn traffic-minimize" onclick="minimizeWindow('minecraft')"><span>-</span></button>
+                    <button class="traffic-btn traffic-maximize" onclick="maximizeWindow('win-minecraft')"><span>+</span></button>
+                </div>
+                <div class="window-title">Minecraft</div>
+            </div>
+            <div class="window-content">
+                <div class="minecraft-container">
+                    <iframe class="browser-iframe" src="[https://ajgplayz-studio.github.io/Arcade-hub/minecraft.html](https://ajgplayz-studio.github.io/Arcade-hub/minecraft.html)"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- TERMINAL WINDOW -->
+        <div class="window" id="win-terminal" style="display: none; top: 120px; left: 220px; width: 650px; height: 400px;" onmousedown="focusWindow('terminal')">
+            <div class="window-header" onmousedown="startDrag(event, 'win-terminal')">
+                <div class="traffic-lights">
+                    <button class="traffic-btn traffic-close" onclick="closeWindow('terminal')"><span>×</span></button>
+                    <button class="traffic-btn traffic-minimize" onclick="minimizeWindow('terminal')"><span>-</span></button>
+                    <button class="traffic-btn traffic-maximize" onclick="maximizeWindow('win-terminal')"><span>+</span></button>
+                </div>
+                <div class="window-title">Terminal</div>
+            </div>
+            <div class="window-content">
+                <div class="terminal-container" id="terminal-scroll">
+                    <div class="terminal-output" id="terminal-output">
+                        <div class="terminal-line">Wave OS v2.4.0 (x86_64-wave-darwin)</div>
+                        <div class="terminal-line">Type 'help' to view available commands.</div>
+                        <div class="terminal-line">&nbsp;</div>
+                    </div>
+                    <div class="terminal-input-row">
+                        <span class="terminal-prompt">wave@os:~$&nbsp;</span>
+                        <input type="text" class="terminal-field" id="terminal-input" autofocus onkeydown="handleTerminalCommand(event)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // AUDIO SYNTHESIS FOR WAVE BOOT SOUND
+        function playWaveSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const bufferSize = audioCtx.sampleRate * 0.8;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(300, audioCtx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+                filter.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.8);
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.8, audioCtx.currentTime + 0.2);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                noise.start();
+            } catch(e) {
+                console.log("Audio not allowed yet");
+            }
+        }
+
+        // BOOT SEQUENCE (5 Seconds)
+        window.addEventListener('DOMContentLoaded', () => {
+            const bootFill = document.getElementById('boot-fill');
+            const powerBtn = document.getElementById('power-btn');
+            
+            // Check if user interaction needed for audio
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 2;
+                bootFill.style.width = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    finishBoot();
+                }
+            }, 50);
         });
 
-        function makeDraggable(element, handle) {
-            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-            
-            handle.onmousedown = dragMouseDown;
-            handle.addEventListener('touchstart', dragTouchStart, {passive: false});
-
-            function dragMouseDown(e) {
-                if(e.target.closest('.traffic-lights')) return;
-                const appId = element.id.replace('window-', '');
-                if (windowStates[appId] && windowStates[appId].maximized) return;
-                e.preventDefault();
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                document.onmouseup = closeDragElement;
-                document.onmousemove = elementDrag;
-                bringToFront(element);
-            }
-
-            function dragTouchStart(e) {
-                if(e.target.closest('.traffic-lights')) return;
-                const appId = element.id.replace('window-', '');
-                if (windowStates[appId] && windowStates[appId].maximized) return;
-                const touch = e.touches[0];
-                pos3 = touch.clientX;
-                pos4 = touch.clientY;
-                document.addEventListener('touchend', closeDragElement);
-                document.addEventListener('touchmove', elementTouchDrag, {passive: false});
-                bringToFront(element);
-            }
-
-            function elementDrag(e) {
-                e.preventDefault();
-                pos1 = pos3 - e.clientX;
-                pos2 = pos4 - e.clientY;
-                pos3 = e.clientX;
-                pos4 = e.clientY;
-                updatePosition();
-            }
-
-            function elementTouchDrag(e) {
-                e.preventDefault();
-                const touch = e.touches[0];
-                pos1 = pos3 - touch.clientX;
-                pos2 = pos4 - touch.clientY;
-                pos3 = touch.clientX;
-                pos4 = touch.clientY;
-                updatePosition();
-            }
-
-            function updatePosition() {
-                let newTop = element.offsetTop - pos2;
-                let newLeft = element.offsetLeft - pos1;
-                if (newTop < 0) newTop = 0;
-                element.style.top = newTop + "px";
-                element.style.left = newLeft + "px";
-            }
-
-            function closeDragElement() {
-                document.onmouseup = null;
-                document.onmousemove = null;
-                document.removeEventListener('touchend', closeDragElement);
-                document.removeEventListener('touchmove', elementTouchDrag);
-            }
+        function finishBoot() {
+            playWaveSound();
+            const bootScreen = document.getElementById('boot-screen');
+            bootScreen.style.opacity = '0';
+            setTimeout(() => {
+                bootScreen.style.display = 'none';
+                document.getElementById('desktop').style.display = 'block';
+            }, 800);
         }
 
-        document.getElementById('term-login-time').innerText = new Date().toString().substring(0, 24);
-        
-        function handleTerminalCommand(e) {
-            if (e.key === 'Enter') {
-                const inputElement = e.target;
-                const cmdString = inputElement.value.trim();
-                const outputDiv = document.getElementById('term-output');
-                
-                const logEntry = document.createElement('div');
-                logEntry.innerHTML = `<span class="font-bold">guest@waveos ~ %</span> ${cmdString.replace(/</g, '&lt;')}`;
-                outputDiv.appendChild(logEntry);
-                
-                if (cmdString !== '') {
-                    const parts = cmdString.split(' ');
-                    const command = parts[0].toLowerCase();
-                    const args = parts.slice(1);
-                    
-                    const response = document.createElement('div');
-                    response.className = 'mb-1 text-gray-300';
-                    
-                    switch (command) {
-                        case 'help':
-                            response.innerHTML = `Available commands:<br>
-                                &nbsp;&nbsp;help&nbsp;&nbsp;&nbsp;&nbsp;- Show this help message<br>
-                                &nbsp;&nbsp;echo&nbsp;&nbsp;&nbsp;&nbsp;- Print text to terminal<br>
-                                &nbsp;&nbsp;date&nbsp;&nbsp;&nbsp;&nbsp;- Show current date and time<br>
-                                &nbsp;&nbsp;whoami&nbsp;&nbsp;- Display current user<br>
-                                &nbsp;&nbsp;clear&nbsp;&nbsp;&nbsp;- Clear the terminal screen`;
-                            outputDiv.appendChild(response);
-                            break;
-                        case 'echo':
-                            response.innerText = args.join(' ');
-                            outputDiv.appendChild(response);
-                            break;
-                        case 'date':
-                            response.innerText = new Date().toString();
-                            outputDiv.appendChild(response);
-                            break;
-                        case 'whoami':
-                            response.innerText = 'guest';
-                            outputDiv.appendChild(response);
-                            break;
-                        case 'clear':
-                            outputDiv.innerHTML = '';
-                            break;
-                        default:
-                            response.innerText = `-bash: ${command}: command not found`;
-                            outputDiv.appendChild(response);
+        function shutdownOS() {
+            document.getElementById('apple-menu').style.display = 'none';
+            document.getElementById('desktop').style.display = 'none';
+            const bootScreen = document.getElementById('boot-screen');
+            bootScreen.style.opacity = '1';
+            bootScreen.style.display = 'flex';
+            document.getElementById('boot-fill').style.width = '0%';
+            document.getElementById('power-btn').style.display = 'block';
+            document.getElementById('power-btn').onclick = () => {
+                document.getElementById('power-btn').style.display = 'none';
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 4;
+                    document.getElementById('boot-fill').style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        finishBoot();
                     }
-                }
-                
-                inputElement.value = '';
-                const termContent = outputDiv.parentElement;
-                termContent.scrollTop = termContent.scrollHeight;
-            }
+                }, 50);
+            };
         }
 
-        let calcValue = '0';
-        let calcFirstOperand = null;
-        let calcOperator = null;
-        let calcWaitingForSecondOperand = false;
-
-        function updateCalcDisplay() {
-            let displayVal = calcValue;
-            if (displayVal.length > 9) {
-                displayVal = parseFloat(displayVal).toPrecision(9);
-            }
-            document.getElementById('calc-display').innerText = displayVal;
+        function restartOS() {
+            document.getElementById('apple-menu').style.display = 'none';
+            shutdownOS();
+            setTimeout(() => {
+                document.getElementById('power-btn').click();
+            }, 200);
         }
 
-        function calcAppend(digit) {
-            if (calcWaitingForSecondOperand) {
-                calcValue = digit;
-                calcWaitingForSecondOperand = false;
-            } else {
-                calcValue = calcValue === '0' ? digit : calcValue + digit;
-            }
-            updateCalcDisplay();
-        }
-
-        function calcAction(action) {
-            const inputValue = parseFloat(calcValue);
-
-            if (action === 'clear') {
-                calcValue = '0';
-                calcFirstOperand = null;
-                calcOperator = null;
-                calcWaitingForSecondOperand = false;
-            } else if (action === 'negate') {
-                calcValue = String(inputValue * -1);
-            } else if (action === 'percent') {
-                calcValue = String(inputValue / 100);
-            } else if (action === '=') {
-                if (calcOperator && calcFirstOperand != null) {
-                    const result = performCalculation[calcOperator](calcFirstOperand, inputValue);
-                    calcValue = String(result);
-                    calcFirstOperand = result;
-                    calcOperator = null;
-                    calcWaitingForSecondOperand = true;
-                }
-            } else { 
-                if (calcOperator && calcWaitingForSecondOperand) {
-                    calcOperator = action;
-                    return;
-                }
-                
-                if (calcFirstOperand == null && !isNaN(inputValue)) {
-                    calcFirstOperand = inputValue;
-                } else if (calcOperator) {
-                    const result = performCalculation[calcOperator](calcFirstOperand, inputValue);
-                    calcValue = String(result);
-                    calcFirstOperand = result;
-                }
-                
-                calcOperator = action;
-                calcWaitingForSecondOperand = true;
-            }
-            updateCalcDisplay();
-        }
-
-        const performCalculation = {
-            '/': (first, second) => first / second,
-            '*': (first, second) => first * second,
-            '+': (first, second) => first + second,
-            '-': (first, second) => first - second,
-        };
-
+        // CLOCK
         function updateClock() {
             const now = new Date();
             const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
-            const timeString = now.toLocaleDateString('en-US', options).replace(/,/g, '');
-            document.getElementById('clock').textContent = timeString;
+            document.getElementById('clock').innerText = now.toLocaleDateString('en-US', options);
         }
         setInterval(updateClock, 1000);
         updateClock();
+
+        // FULLSCREEN
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(err);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // APPLE MENU TOGGLE
+        function toggleAppleMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('apple-menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
+        window.addEventListener('click', () => {
+            document.getElementById('apple-menu').style.display = 'none';
+        });
+
+        // INSTALLED APPS STATE
+        const installedApps = {
+            calculator: true,
+            browser: false,
+            minecraft: false,
+            terminal: true
+        };
+
+        const appNames = {
+            appstore: 'App Store',
+            calculator: 'Calculator',
+            browser: 'Browser',
+            minecraft: 'Minecraft',
+            terminal: 'Terminal'
+        };
+
+        function installApp(appName) {
+            const btn = document.getElementById(`btn-install-${appName}`);
+            const prog = document.getElementById(`prog-${appName}`);
+            const fill = document.getElementById(`fill-${appName}`);
+            
+            btn.style.display = 'none';
+            prog.style.display = 'block';
+            
+            let p = 0;
+            const timer = setInterval(() => {
+                p += 2;
+                fill.style.width = p + '%';
+                if (p >= 100) {
+                    clearInterval(timer);
+                    prog.style.display = 'none';
+                    btn.innerText = 'INSTALLED';
+                    btn.classList.add('installed');
+                    btn.style.display = 'block';
+                    installedApps[appName] = true;
+                    renderDock();
+                }
+            }, 100);
+        }
+
+        function renderDock() {
+            const container = document.getElementById('installed-dock-apps');
+            container.innerHTML = '';
+            
+            if (installedApps.browser) {
+                container.innerHTML += `
+                    <div class="dock-icon" title="Browser" onclick="openWindow('browser')">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                        <div class="dock-dot" id="dot-browser"></div>
+                    </div>
+                `;
+            }
+            if (installedApps.minecraft) {
+                container.innerHTML += `
+                    <div class="dock-icon" title="Minecraft" onclick="openWindow('minecraft')">
+                        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v4H7zm4-3h2v10h-2zm4 3h2v4h-2z"/></svg>
+                        <div class="dock-dot" id="dot-minecraft"></div>
+                    </div>
+                `;
+            }
+        }
+
+        // WINDOW MANAGEMENT
+        let highestZIndex = 200;
+
+        function openWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            if (!win) return;
+            
+            win.style.display = 'flex';
+            win.classList.remove('minimized');
+            focusWindow(appId);
+            
+            const dot = document.getElementById(`dot-${appId}`);
+            if (dot) dot.style.display = 'block';
+
+            document.getElementById('active-app-name').innerText = appNames[appId] || 'Wave OS';
+        }
+
+        function closeWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            if (!win) return;
+            win.style.display = 'none';
+            
+            const dot = document.getElementById(`dot-${appId}`);
+            if (dot) dot.style.display = 'none';
+            document.getElementById('active-app-name').innerText = 'Wave OS';
+        }
+
+        function minimizeWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            if (!win) return;
+            win.classList.add('minimized');
+            document.getElementById('active-app-name').innerText = 'Wave OS';
+        }
+
+        function maximizeWindow(winId) {
+            const win = document.getElementById(winId);
+            if (!win) return;
+            win.classList.toggle('maximized');
+            focusWindow(winId.replace('win-', ''));
+        }
+
+        function focusWindow(appId) {
+            const win = document.getElementById(`win-${appId}`);
+            if (!win) return;
+            highestZIndex++;
+            win.style.zIndex = highestZIndex;
+            document.getElementById('active-app-name').innerText = appNames[appId] || 'Wave OS';
+        }
+
+        // DRAGGING LOGIC
+        let activeDragWindow = null;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+
+        function startDrag(e, winId) {
+            if (e.target.closest('.traffic-lights')) return;
+            const win = document.getElementById(winId);
+            if (win.classList.contains('maximized')) return;
+            
+            activeDragWindow = win;
+            focusWindow(winId.replace('win-', ''));
+            
+            const rect = win.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+            
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', stopDrag);
+            e.preventDefault();
+        }
+
+        function onDrag(e) {
+            if (!activeDragWindow) return;
+            let newX = e.clientX - dragOffsetX;
+            let newY = e.clientY - dragOffsetY;
+            
+            // Keep window below menu bar
+            if (newY < 28) newY = 28;
+            
+            activeDragWindow.style.left = newX + 'px';
+            activeDragWindow.style.top = newY + 'px';
+        }
+
+        function stopDrag() {
+            activeDragWindow = null;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+
+        // CALCULATOR LOGIC
+        let calcValue = '0';
+        let calcOperand = null;
+        let calcPrevious = null;
+        let calcResetScreen = false;
+
+        function updateCalcDisplay() {
+            document.getElementById('calc-display').innerText = calcValue;
+        }
+
+        function calcClear() {
+            calcValue = '0';
+            calcOperand = null;
+            calcPrevious = null;
+            updateCalcDisplay();
+        }
+
+        function calcAppend(num) {
+            if (calcValue === '0' || calcResetScreen) {
+                calcValue = num;
+                calcResetScreen = false;
+            } else {
+                calcValue += num;
+            }
+            updateCalcDisplay();
+        }
+
+        function calcSign() {
+            calcValue = (parseFloat(calcValue) * -1).toString();
+            updateCalcDisplay();
+        }
+
+        function calcPercent() {
+            calcValue = (parseFloat(calcValue) / 100).toString();
+            updateCalcDisplay();
+        }
+
+        function calcOp(op) {
+            calcPrevious = parseFloat(calcValue);
+            calcOperand = op;
+            calcResetScreen = true;
+        }
+
+        function calcCompute() {
+            if (calcOperand === null || calcPrevious === null) return;
+            const current = parseFloat(calcValue);
+            let result = 0;
+            switch(calcOperand) {
+                case '+': result = calcPrevious + current; break;
+                case '-': result = calcPrevious - current; break;
+                case '*': result = calcPrevious * current; break;
+                case '/': result = current === 0 ? 'Error' : calcPrevious / current; break;
+            }
+            calcValue = result.toString();
+            calcOperand = null;
+            calcPrevious = null;
+            calcResetScreen = true;
+            updateCalcDisplay();
+        }
+
+        // TERMINAL LOGIC
+        function handleTerminalCommand(e) {
+            if (e.key === 'Enter') {
+                const inputField = document.getElementById('terminal-input');
+                const cmd = inputField.value.trim();
+                const output = document.getElementById('terminal-output');
+                
+                output.innerHTML += `<div class="terminal-line">wave@os:~$ ${escapeHtml(cmd)}</div>`;
+                
+                if (cmd === 'help') {
+                    output.innerHTML += `<div class="terminal-line">Available commands: help, clear, date, whoami, ls, neofetch, restart, shutdown</div>`;
+                } else if (cmd === 'clear') {
+                    output.innerHTML = '';
+                } else if (cmd === 'date') {
+                    output.innerHTML += `<div class="terminal-line">${new Date().toString()}</div>`;
+                } else if (cmd === 'whoami') {
+                    output.innerHTML += `<div class="terminal-line">wave-user (staff)</div>`;
+                } else if (cmd === 'ls') {
+                    output.innerHTML += `<div class="terminal-line">Applications/  Desktop/  Documents/  System/</div>`;
+                } else if (cmd === 'neofetch') {
+                    output.innerHTML += `<div class="terminal-line">
+                        wave@os<br>
+                        -------<br>
+                        OS: Wave OS x86_64-darwin<br>
+                        Host: Wave Web Engine<br>
+                        Kernel: 6.8.0-wave<br>
+                        Uptime: active<br>
+                        Shell: bash 5.2.15<br>
+                        DE: AquaWave Glass
+                    </div>`;
+                } else if (cmd === 'restart') {
+                    restartOS();
+                } else if (cmd === 'shutdown') {
+                    shutdownOS();
+                } else if (cmd !== '') {
+                    output.innerHTML += `<div class="terminal-line">wave: command not found: ${escapeHtml(cmd)}</div>`;
+                }
+                
+                inputField.value = '';
+                const scroll = document.getElementById('terminal-scroll');
+                scroll.scrollTop = scroll.scrollHeight;
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
     </script>
 </body>
 </html>
